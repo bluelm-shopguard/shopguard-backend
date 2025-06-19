@@ -101,14 +101,12 @@ python-dotenv>=1.0.0
 
 ```bash
 # 克隆项目
-git clone <repository-url>
-cd server
+git clone https://github.com/bluelm-shopguard/shopguard-backend
 
 # 创建虚拟环境（推荐）
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# 或
-venv\Scripts\activate     # Windows
+# venv\Scripts\activate     # Windows
 
 # 安装依赖
 pip install -r requirements.txt
@@ -128,16 +126,6 @@ cp .env.example .env
 # vivo AI 平台配置
 VIVO_APP_ID=your_app_id_here
 VIVO_APP_KEY=your_app_key_here
-
-# API 服务配置
-VIVOGPT_API_URI=/vivogpt/completions
-VIVOGPT_API_DOMAIN=api-ai.vivo.com.cn
-
-MULTIMODAL_URI=/vivogpt/completions
-MULTIMODAL_DOMAIN=api-ai.vivo.com.cn
-
-RAG_API_URI=/embedding-model-api/predict/batch
-RAG_API_DOMAIN=api-ai.vivo.com.cn
 
 # Web 搜索配置（可选）
 WEB_SEARCH_API_KEY=your_web_search_key
