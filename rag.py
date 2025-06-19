@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 # --- 从 JSON 文件加载知识库数据 ---
 ALL_KNOWLEDGE_EMBEDDING_DATA = []
-DEFAULT_KNOWLEDGE_FILE = "knowledge_base_embeddings\\all_knowledge_embeddings.json"
+DEFAULT_KNOWLEDGE_FILE = "knowledge_base_embeddings/all_knowledge_embeddings.json"
 
 def load_knowledge_from_json(file_path: str) -> list:
     """从指定的 JSON 文件加载知识库数据。"""
