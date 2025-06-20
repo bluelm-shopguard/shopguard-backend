@@ -21,7 +21,7 @@ def call_web_search_api(
     search_query,
     search_engine="search_std",
     search_intent=True,
-    count=5,
+    count=4,
     search_domain_filter=None,
     search_recency_filter="noLimit",
     content_size="small",

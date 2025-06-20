@@ -12,6 +12,7 @@ load_dotenv()
 APP_ID = os.getenv("VIVO_APP_ID")
 APP_KEY = os.getenv("VIVO_APP_KEY")
 URI = os.getenv("VIVOGPT_API_URI")  
+STREAM_URI = os.getenv("VIVOGPT_API_STREAM_URI") 
 DOMAIN = os.getenv("VIVOGPT_API_DOMAIN")  
 METHOD = 'POST'
 
@@ -20,17 +21,32 @@ def ask_vivogpt(messages, extra, model='vivo-BlueLM-TB-Pro', session_id=None):
     向大模型发起同步请求并返回 (content, time_cost)。
     出错时返回 (None, 错误信息)。
     """
+    system_messages = [msg for msg in messages if msg.get("role") == "system"]
+    filtered_messages = [msg for msg in messages if msg.get("role") != "system"]
+    
+    # 合并所有system消息内容作为systemPrompt
+    system_prompt = "\n".join([msg.get("content", "") for msg in system_messages]) if system_messages else None
+    
+    # 确保每个消息都有contentType字段
+    for msg in filtered_messages:
+        if "contentType" not in msg:
+            msg["contentType"] = "text"
+            
     if not session_id:
         session_id = str(uuid.uuid4())
 
     request_id = str(uuid.uuid4())
     params = {'requestId': request_id}
     payload = {
-        'messages': messages,
+        'messages': filtered_messages,
         'model': model,
         'sessionId': session_id,
-        'extra': extra if extra is not None else {} #确保 extra 是一个字典
+        'extra': extra if extra is not None else {}
     }
+    
+    # 如果有system消息，添加systemPrompt字段
+    if system_prompt:
+        payload['systemPrompt'] = system_prompt
 
     headers = gen_sign_headers(APP_ID, APP_KEY, METHOD, URI, params)
     headers['Content-Type'] = 'application/json'
@@ -115,3 +131,48 @@ def ask_vivogpt(messages, extra, model='vivo-BlueLM-TB-Pro', session_id=None):
             error_message += f' Details: {response_body_text}'
         # 如果res_obj为None且response_body_text为空，则只返回HTTP错误状态码信息
         return None, error_message
+    
+def ask_vivogpt_stream(messages, extra, model='vivo-BlueLM-TB-Pro', session_id=None):
+    """
+    向大模型发起流式请求并生成响应。
+    """
+    system_messages = [msg for msg in messages if msg.get("role") == "system"]
+    filtered_messages = [msg for msg in messages if msg.get("role") != "system"]
+    
+    # 合并所有system消息内容作为systemPrompt
+    system_prompt = "\n".join([msg.get("content", "") for msg in system_messages]) if system_messages else None
+    
+    # 确保每个消息都有contentType字段
+    for msg in filtered_messages:
+        if "contentType" not in msg:
+            msg["contentType"] = "text"
+            
+    if not session_id:
+        session_id = str(uuid.uuid4())
+
+    request_id = str(uuid.uuid4())
+    params = {'requestId': request_id}
+    payload = {
+        'messages': filtered_messages,
+        'model': model,
+        'sessionId': session_id,
+        'extra': extra if extra is not None else {}
+    }
+    
+    # 如果有system消息，添加systemPrompt字段
+    if system_prompt:
+        payload['systemPrompt'] = system_prompt
+
+    stream_uri = STREAM_URI if STREAM_URI else URI  # 使用流式URI或默认URI
+    
+    # 使用流式URI
+    headers = gen_sign_headers(APP_ID, APP_KEY, METHOD, stream_uri, params)
+    headers['Content-Type'] = 'application/json'
+    url = f'https://{DOMAIN}{stream_uri}'
+
+    try:
+        resp = requests.post(url, json=payload, headers=headers, params=params, stream=True, timeout=100)
+        return resp
+    except requests.RequestException as e:
+        return None
+

@@ -142,7 +142,7 @@ def get_system_prompt(user_type):
         "要不要把客服微信号发我？我帮你查查有没有被举报记录 🕵️‍♂️📱\n"
     )
 
-def get_all_system_prompt(user_type):
+def get_shopping_function_call_prompt(user_type):
     return f"""你是购物反诈小助手，你的任务是帮助{user_type}识别和避免在购物过程中遇到的欺诈行为。
 
 你可以使用的工具如下:
@@ -206,4 +206,105 @@ def get_all_system_prompt(user_type):
 <APIs>[{{"name": "web_search", "parameters": {{"search_query": "...", ...}}}}]</APIs>。
 请判断用户的输入是否需要联网搜索。如果需要，请严格按照上述 <APIs> 格式返回 function call，此时你的回答应该只包含 <APIs> ... </APIs> 结构。
 如果你认为当前用户输入不需要联网搜索，或者你无法为当前问题构造一个合适的搜索查询，你可以直接回答用户的问题。在这种情况下，请在回答时向用户说明你的答复未经联网核实。
+"""
+
+def shopping_relevance_prompt(merged_text):
+    return (
+        f"""
+请判断以下用户问题是否与购物、消费、商品、价格、电商、购买、交易、支付、退款、物流、商家、店铺、促销、优惠券、商品评价等购物相关主题有关。
+
+用户问题：{merged_text}
+
+请只回答"是"或"否"，不要添加任何其他内容。
+如果问题涉及购物、买卖、商品咨询、价格比较、购物建议、电商平台、支付问题等，回答"是"。
+如果问题是关于学习、娱乐、技术、健康、旅游、天气、新闻等与购物无关的话题，回答"否"。
+"""
+    )
+
+
+def get_normal_function_call_prompt(user_type):
+    return f"""你是一个智能助手，当前用户提出了一个与购物无关的问题。你需要判断是否需要联网搜索来获取最新信息。
+
+你可以使用的工具如下:
+<APIs>
+[
+    {{
+        "name": "web_search",
+        "description": "联网搜索，获取网页摘要、标题、链接等信息。适合获取实时信息如天气、新闻、股价、技术资料、学习资源、百科知识等",
+        "parameters": {{
+            "type": "object",
+            "properties": {{
+                "search_query": {{
+                    "type": "string",
+                    "description": "需要进行搜索的内容，建议不超过70字符"
+                }},
+                "search_engine": {{
+                    "type": "string",
+                    "enum": ["search_std", "search_pro", "search_pro_sogou", "search_pro_quark", "search_pro_jina", "search_pro_bing"],
+                    "description": "要调用的搜索引擎编码，默认推荐search_std"
+                }},
+                "search_intent": {{
+                    "type": "boolean",
+                    "description": "是否进行搜索意图识别，默认false"
+                }},
+                "count": {{
+                    "type": "integer",
+                    "description": "返回结果的条数，1-50，建议5-10条"
+                }},
+                "search_domain_filter": {{
+                    "type": "string",
+                    "description": "限定搜索结果的域名，如www.example.com（可选）"
+                }},
+                "search_recency_filter": {{
+                    "type": "string",
+                    "enum": ["oneDay", "oneWeek", "oneMonth", "oneYear", "noLimit"],
+                    "description": "搜索指定时间范围内的网页，默认noLimit"
+                }},
+                "content_size": {{
+                    "type": "string",
+                    "enum": ["medium", "high"],
+                    "description": "网页摘要字数，medium约400-600字，high约2500字，默认medium"
+                }},
+                "request_id": {{
+                    "type": "string",
+                    "description": "请求唯一标识（可选）"
+                }},
+                "user_id": {{
+                    "type": "string",
+                    "description": "终端用户唯一ID（可选）"
+                }}
+            }},
+            "required": ["search_query", "search_engine", "search_intent"]
+        }}
+    }}
+]
+</APIs>
+
+如果需要联网搜索,请返回<APIs>[{{"name": "web_search", "parameters": {{"search_query": "...", ...}}}}]</APIs>。
+如果不需要联网搜索,请返回"无需联网搜索"这六个字即可,其余内容无需返回,无需回答用户问题。
+请根据用户问题判断是否需要联网搜索：
+
+**需要搜索的情况：**
+- 实时信息：天气预报、新闻事件、股价行情、汇率等
+- 最新资讯：科技动态、政策变化、体育赛事结果等
+- 具体查询：某个公司信息、产品参数、技术规格等
+- 学习资源：教程、文档、学术资料等
+- 地理信息：地点介绍、交通信息、营业时间等
+- 事实核查：需要验证的信息、数据统计等
+
+**不需要搜索的情况：**
+- 基础常识：数学计算、基本概念解释等
+- 创意任务：写作、翻译、头脑风暴等
+- 编程代码：代码示例、算法实现等（除非需要最新API文档）
+- 简单对话：问候、闲聊、情感支持等
+
+**输出格式：**
+- 如果需要搜索：请严格按照 [FUNCTION_CALL][{{"name": "web_search", "parameters": {{...}}}}][/FUNCTION_CALL] 格式返回
+- 如果不需要搜索：直接回答用户问题，并说明"以下回答基于我的知识库，未经联网核实"
+
+**搜索建议：**
+- 搜索关键词要简洁明确，避免过长
+- 优先使用search_std引擎
+- 根据问题时效性选择合适的时间范围
+- 一般情况下count设置为5-10条即可
 """
