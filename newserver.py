@@ -931,8 +931,8 @@ async def get_stats():
     }
 
 
-# --- 运行服务器 ---
-if __name__ == "__main__":
+# --- 本地运行服务器 ---
+if __name__ == "__main__" and not os.getenv("VERCEL"):
     logger.info("启动 OpenAI-Compatible FastAPI 服务器...")
     logger.info(f"RAG系统状态: {'可用' if rag_system_instance else '不可用'}")
     logger.info(
