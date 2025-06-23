@@ -2,17 +2,8 @@
   "version": 2,
   "builds": [
     {
-      "src": "debug_deps.ppy",
-      "use": "@vercel/static-build",
-      "config": {
-        "cmds": [
-          "pip install -r requirements.txt",
-          "pip install tqdm",
-          "python -c \"import os, pkg_resources; from tqdm import tqdm; pkgs = sorted([(p.project_name, p.location) for p in pkg_resources.working_set], key=lambda x: x[0]); print('--- Package Sizes ---'); total = 0; for name, loc in tqdm(pkgs): size = sum(os.path.getsize(os.path.join(d, f)) for d, _, fs in os.walk(loc) for f in fs); print(f'{name:<30} {size / 1024 / 1024:>10.2f} MB'); total += size; print(f'--- Total Size: {total / 1024 / 1024:.2f} MB ---')\"",
-          "echo 'Build finished. Check logs for package sizes.' > index.html"
-        ]
-      }
+      "src": "debug_deps.py",
+      "use": "@vercel/python"
     }
-  ],
-  "routes": [{ "src": "/(.*)", "dest": "/index.html" }]
+  ]
 }
