@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "build.sh",
+      "src": "debug_deps.ppy",
       "use": "@vercel/static-build",
       "config": {
         "cmds": [
