@@ -1,0 +1,12 @@
+# 忽略由 AI 模型生成的嵌入数据
+knowledge_base_embeddings/
+
+# 忽略原始的知识库文件
+knowledge_base/
+
+# 也可以忽略其他不需要部署的文件/文件夹
+__pycache__/
+test/
+README.pdf
+*.venv
+.venv
