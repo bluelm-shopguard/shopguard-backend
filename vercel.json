@@ -2,8 +2,12 @@
   "version": 2,
   "builds": [
     {
-      "src": "debug_deps.py",
+      "src": "newserver.py",
       "use": "@vercel/python"
     }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "newserver.py" }
   ]
 }
