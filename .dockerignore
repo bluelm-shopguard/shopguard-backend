@@ -1,0 +1,19 @@
+# .dockerignore
+
+# Environment files
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv
+.venv
+
+# IDE and OS files
+.vscode
+.idea
+.DS_Store
