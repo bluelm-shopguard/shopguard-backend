@@ -1,0 +1,28 @@
+# Essential dependencies for ShopGuard Backend
+fastapi==0.115.13
+uvicorn==0.34.3
+python-dotenv==1.1.0
+requests==2.32.3
+pydantic==2.11.7
+starlette==0.46.2
+
+# For multimodal processing
+pillow==10.4.0
+beautifulsoup4==4.13.4
+
+# For OpenAI integration
+openai==1.90.0
+
+# For machine learning/embeddings (minimal numpy for vector operations)
+numpy==1.26.4
+scikit-learn==1.4.2
+
+# For PDF processing
+pypdf==5.6.0
+
+# For async operations
+httpx==0.28.1
+anyio==4.9.0
+
+# For CORS middleware
+fastapi[standard]

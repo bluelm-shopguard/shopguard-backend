@@ -1,0 +1,25 @@
+# Optimized dependencies for Vercel deployment
+fastapi==0.115.13
+uvicorn==0.34.3
+python-dotenv==1.1.0
+requests==2.32.3
+pydantic==2.11.7
+starlette==0.46.2
+
+# For multimodal processing (lighter alternatives)
+pillow==10.4.0
+beautifulsoup4==4.13.4
+
+# For OpenAI integration
+openai==1.90.0
+
+# For async operations
+httpx==0.28.1
+anyio==4.9.0
+
+# Exclude heavy ML dependencies that might not be essential:
+# scikit-learn==1.6.1  # ~50MB+ - consider if really needed
+# numpy==2.0.0         # Large dependency - use only if essential
+
+# For PDF processing (lighter alternative)
+pypdf==5.6.0

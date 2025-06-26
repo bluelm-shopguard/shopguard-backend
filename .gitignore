@@ -67,3 +67,6 @@ Thumbs.db
 all_knowledge_embeddings.json
 vectorize.py
 preprocessknowledge.py
+
+# === other unnecessary files ===
+README.pdf
