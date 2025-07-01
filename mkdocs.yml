@@ -1,0 +1,90 @@
+site_name: ShopGuard Backend Documentation
+site_description: vivo BlueLM OpenAI-Compatible API Server for Consumer Protection
+site_author: ShopGuard Team
+site_url: https://shopguard-backend.readthedocs.io
+
+# Repository
+repo_name: shopguard-backend
+repo_url: https://github.com/your-org/shopguard-backend
+
+# Configuration
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.tabs.link
+
+# Extensions
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator:
+        !!python/name:material.extensions.emoji.to_svg # Navigation
+
+
+nav:
+  - Home: README.md
+  - Getting Started:
+      - Quick Start: quick-start.md
+      - Configuration: configuration-guide.md
+  - API Documentation:
+      - API Reference: api-reference.md
+      - Image Input Guide: how-to-image-input.md
+      - Web Search Guide: how-to-web-search.md
+  - Deployment:
+      - Production Deployment: production-deployment.md
+      - China Deployment: host docker image and server in China.md
+      - Aliyun ECS SSH: how to ssh aliyun ECS.md
+
+# Plugins
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+
+# Extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/your-org/shopguard-backend
+  version:
+    provider: mike
+
+# Copyright
+copyright: Copyright &copy; 2025 ShopGuard Team
