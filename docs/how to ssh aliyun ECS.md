@@ -1,5 +1,7 @@
 you need a main.pem file
 
+ip can be public or private
+
 contact krisspy if necessary
 
 ```bash
