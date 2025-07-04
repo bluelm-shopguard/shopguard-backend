@@ -6,11 +6,16 @@ import base64
 import uuid
 import time
 import requests
+import os
+from dotenv import load_dotenv
 from auth_util import gen_sign_headers  # 签名工具函数，生成鉴权头部
 
-# 请替换为你自己的 APP_ID 和 APP_KEY
-APP_ID = '2025863341'
-APP_KEY = 'ShRBDpAqGvISQKOb'
+# 加载环境变量
+load_dotenv()
+
+# vivo AI 平台分配的 APP_ID 和 APP_KEY（从环境变量中读取）
+APP_ID = os.getenv('VIVO_APP_ID')
+APP_KEY = os.getenv('VIVO_APP_KEY')
 
 # 接口路径和域名
 URI = '/vivogpt/completions'
