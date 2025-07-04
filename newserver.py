@@ -26,6 +26,7 @@ from prompt import (
     get_normal_function_call_prompt,
     get_system_prompt,
     shopping_relevance_prompt,
+    get_normal_system_prompt
 )
 
 # 加载环境变量
@@ -389,7 +390,12 @@ async def create_chat_completion(request: ChatCompletionRequest):
         )
         user_type = determine_user_type([msg.model_dump() for msg in request.messages])
 
+        # 配置查询改写器
+        query_rewriter.enable_query_rewriting(request.enable_query_rewriting)
+        query_rewriter.set_rewrite_mode(request.query_rewrite_mode or "auto")
+        
         logger.info(f"处理用户 {user_id} (类型: {user_type}) 的请求")
+        logger.info(f"查询改写配置: 启用={request.enable_query_rewriting}, 模式={request.query_rewrite_mode}")
 
         converted_messages = []
         has_image = False
@@ -522,6 +528,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
 
         logger.info(f"原始合并后的文本内容: {merged_text[:]}...")
 
+        # 购物相关性判断 - 使用原始查询，不进行改写
         shopping_check_messages = [
             {"role": "user", "content": shopping_relevance_prompt(merged_text)}
         ]
@@ -571,13 +578,23 @@ async def create_chat_completion(request: ChatCompletionRequest):
             # 检查是否启用RAG
             if request.enable_rag and rag_system_instance:
                 try:
-                    logger.info(
-                        f'RAG: 启用RAG检索，使用查询 "{merged_text[:100]}..." 进行检索'
+                    # 应用查询改写优化RAG检索
+                    rewritten_query_for_rag = query_rewriter.rewrite_query(
+                        merged_text, context="rag", is_shopping_related=is_shopping_related
                     )
+                    
+                    logger.info(
+                        f'RAG: 启用RAG检索，原始查询: "{merged_text[:100]}..."'
+                    )
+                    logger.info(
+                        f'RAG: 改写后查询: "{rewritten_query_for_rag[:100]}..."'
+                    )
+                    
                     rag_top_k = request.rag_top_k or 2
                     retrieved_rag_context = rag_system_instance.retrieve_and_format(
-                        merged_text, top_n=rag_top_k
+                        rewritten_query_for_rag, top_n=rag_top_k
                     )
+                    
                     if retrieved_rag_context:
                         logger.info(
                             f"RAG: 检索到的上下文长度: {len(retrieved_rag_context)}"
@@ -587,6 +604,18 @@ async def create_chat_completion(request: ChatCompletionRequest):
                         )
                     else:
                         logger.info("RAG: 未检索到相关上下文。")
+                        
+                        # 如果改写后的查询没有结果，尝试使用原始查询
+                        if rewritten_query_for_rag != merged_text:
+                            logger.info("RAG: 尝试使用原始查询进行二次检索...")
+                            retrieved_rag_context = rag_system_instance.retrieve_and_format(
+                                merged_text, top_n=rag_top_k
+                            )
+                            if retrieved_rag_context:
+                                logger.info(f"RAG: 原始查询检索成功，上下文长度: {len(retrieved_rag_context)}")
+                            else:
+                                logger.info("RAG: 原始查询也未检索到相关上下文。")
+                        
                 except Exception as e:
                     logger.error(f"RAG 检索过程中发生错误: {e}", exc_info=True)
                     retrieved_rag_context = ""
@@ -661,6 +690,14 @@ async def create_chat_completion(request: ChatCompletionRequest):
 
                 # 提取搜索参数
                 search_query = func_params.get("search_query", "测试搜索关键词")
+                
+                # 应用查询改写优化搜索效果
+                rewritten_search_query = query_rewriter.rewrite_query(
+                    search_query, context="search", is_shopping_related=is_shopping_related
+                )
+                
+                logger.info(f"搜索查询改写: '{search_query}' -> '{rewritten_search_query}'")
+                
                 search_engine = func_params.get("search_engine", "search_std")
                 search_intent = bool(func_params.get("search_intent", False))
                 count = int(func_params.get("count", 10))
@@ -672,7 +709,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
                 request_id_param = func_params.get("request_id")
 
                 function_result = call_web_search_api(
-                    search_query=search_query,
+                    search_query=rewritten_search_query,  # 使用改写后的查询
                     search_engine=search_engine,
                     search_intent=search_intent,
                     count=count,
@@ -709,17 +746,29 @@ async def create_chat_completion(request: ChatCompletionRequest):
                         f"搜索结果过长 ({len(core_result_str)} chars)，将进行摘要。"
                     )
 
+                    # 针对7k上下文限制，优化截取长度到6000-6500字符
+                    max_content_length = 6500  # 充分利用7k上下文空间
+                    truncated_content = core_result_str[:max_content_length]
+                    if len(core_result_str) > max_content_length:
+                        truncated_content += "...[内容被截断]"
+
                     if is_shopping_related:
                         summarization_prompt = (
-                            f"你是一个信息处理助手。请将以下联网搜索结果总结为一段保留核心信息的摘要，特别关注价格,品质,平台可信度等和购物诈骗有关的的关键信息，以便后续用于回答用户关于'{search_query}'的问题。请直接输出摘要内容，不要添加任何额外解释。\n\n"
-                            f"原始搜索结果:\n{core_result_str}"
+                            f"请将以下搜索结果总结为500字以内的摘要，重点提取与购物安全、价格合理性、平台可信度相关的信息："
+                            f"\n\n{truncated_content}"
                         )
-
                     else:
                         summarization_prompt = (
-                            f"你是一个信息处理助手。请将以下联网搜索结果总结为一段保留核心信息的摘要，以便后续用于回答用户关于'{search_query}'的问题。请直接输出摘要内容，不要添加任何额外解释。\n\n"
-                            f"原始搜索结果:\n{core_result_str}"
+                            f"请将以下搜索结果总结为500字以内的摘要，保留关键信息："
+                            f"\n\n{truncated_content}"
                         )
+
+                    # 使用更保守的参数进行摘要
+                    summary_extra_params = {
+                        "temperature": 0.3,
+                        "max_tokens": 2048,  # 增加摘要输出长度
+                        "top_p": 0.8
+                    }
 
                     summarization_messages = [
                         {"role": "user", "content": summarization_prompt}
@@ -728,32 +777,34 @@ async def create_chat_completion(request: ChatCompletionRequest):
                     summary, summary_error = ask_vivogpt(
                         messages=summarization_messages,
                         model=request.model,
-                        extra=extra_params,
+                        extra=summary_extra_params,
                     )
 
-                    if summary:
-                        final_search_content_for_llm = summary
+                    if summary and summary.strip():
+                        final_search_content_for_llm = summary.strip()
                         logger.info(
-                            f"搜索结果摘要成功: {final_search_content_for_llm[:200]}..."
+                            f"搜索结果摘要成功，长度: {len(final_search_content_for_llm)}"
                         )
+                        logger.info(f"摘要内容预览: {final_search_content_for_llm[:200]}...")
                     else:
                         logger.warning(
-                            f"搜索结果摘要失败: {summary_error}。将使用原始搜索结果。"
+                            f"搜索结果摘要失败: {summary_error}。使用截断的原始结果。"
                         )
-                        final_search_content_for_llm = json.dumps(
-                            {"search_result": core_result}, ensure_ascii=False
-                        )
+                        # 使用截断的原始结果，而不是完整结果
+                        final_search_content_for_llm = truncated_content
                 else:
-                    logger.info("搜索结果长度适中，无需摘要，使用原始结果。")
-                    final_search_content_for_llm = json.dumps(
-                        {"search_result": core_result}, ensure_ascii=False
-                    )
+                    logger.info("搜索结果长度适中，直接使用原始结果。")
+                    final_search_content_for_llm = core_result_str
 
             except Exception as e:
                 logger.error(f"处理搜索结果摘要时发生意外错误: {e}", exc_info=True)
-                final_search_content_for_llm = json.dumps(
-                    {"search_result": core_result}, ensure_ascii=False
-                )
+                # 异常情况下使用截断的结果，避免prompt过长
+                core_result_str = json.dumps(core_result, ensure_ascii=False)
+                if len(core_result_str) > 6000:
+                    final_search_content_for_llm = core_result_str[:6000] + "...[内容被截断]"
+                    logger.info(f"异常情况下使用截断的搜索结果，长度: {len(final_search_content_for_llm)}")
+                else:
+                    final_search_content_for_llm = core_result_str
 
             # 11. 第二次LLM调用：生成最终回复
             if is_shopping_related:
@@ -789,9 +840,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
             if is_shopping_related:
                 system_prompt_for_final_answer = get_system_prompt(user_type)
             else:
-                system_prompt_for_final_answer = (
-                    "你是一个智能助手，旨在回答用户的问题。"
-                )
+                system_prompt_for_final_answer = get_normal_system_prompt(user_type)
 
             messages_for_final_llm = [
                 {"role": "system", "content": system_prompt_for_final_answer}
@@ -895,7 +944,12 @@ async def root():
         "message": "OpenAI-Compatible Server for vivo BlueLM",
         "version": "1.0.0",
         "endpoints": ["/v1/models", "/v1/chat/completions"],
-        "features": ["RAG", "MultiModal", "WebSearch", "ConversationHistory"],
+        "features": ["RAG", "MultiModal", "WebSearch", "ConversationHistory", "QueryRewriting"],
+        "query_rewriting": {
+            "available": query_rewriter is not None,
+            "modes": ["auto", "aggressive", "conservative"],
+            "contexts": ["rag", "search", "shopping", "general"]
+        }
     }
 
 
@@ -906,12 +960,15 @@ async def health_check():
         "status": "healthy",
         "timestamp": int(time.time()),
         "rag_available": rag_system_instance is not None,
+        "query_rewriting_available": query_rewriter is not None,
         "active_sessions": len(conversation_history),
         "system_info": {
             "rag_initialized": rag_system_instance is not None,
             "knowledge_base_size": (
                 len(ALL_KNOWLEDGE_EMBEDDING_DATA) if ALL_KNOWLEDGE_EMBEDDING_DATA else 0
             ),
+            "query_rewriter_enabled": query_rewriter.should_rewrite() if query_rewriter else False,
+            "query_rewrite_mode": getattr(query_rewriter, 'rewrite_mode', 'auto') if query_rewriter else 'unknown',
         },
     }
 
@@ -928,8 +985,306 @@ async def get_stats():
         "knowledge_base_entries": (
             len(ALL_KNOWLEDGE_EMBEDDING_DATA) if ALL_KNOWLEDGE_EMBEDDING_DATA else 0
         ),
+        "query_rewriting_status": "available" if query_rewriter else "unavailable",
+        "query_rewrite_config": {
+            "enabled": query_rewriter.should_rewrite() if query_rewriter else False,
+            "mode": getattr(query_rewriter, 'rewrite_mode', 'auto') if query_rewriter else 'unknown',
+        },
     }
 
+
+# --- 查询改写功能模块 ---
+import re
+from typing import List, Optional
+
+class QueryRewriter:
+    """查询改写器，用于优化用户查询以提高搜索和RAG检索效果"""
+    
+    def __init__(self):
+        self.rewriting_enabled = True
+        self.rewrite_mode = "auto"  # auto/aggressive/conservative
+        
+        # 购物相关同义词映射
+        self.shopping_synonyms = {
+            "便宜": "价格低 优惠 性价比高 划算",
+            "贵": "价格高 昂贵 费用高",
+            "好用": "质量好 用户评价 使用体验 实用性强",
+            "不好用": "质量差 用户差评 体验不佳",
+            "靠谱": "可信度高 正品 官方授权 信誉好",
+            "不靠谱": "可信度低 假货风险 信誉差",
+            "假货": "正品鉴别 防伪验证 官方渠道",
+            "真货": "正品保证 官方认证 品质保证",
+            "退货": "退换货政策 售后服务 退款流程",
+            "快递": "物流配送 快递服务 送货时间",
+            "评价": "用户评论 商品评分 购买体验",
+            "推荐": "热门商品 用户推荐 销量排行",
+            "性价比": "价格对比 性能比较 优惠程度",
+            "品牌": "品牌对比 知名品牌 品牌信誉",
+            "质量": "产品质量 做工精细 使用寿命",
+            "安全": "购物安全 支付安全 个人信息保护"
+        }
+        
+        # 通用同义词映射
+        self.general_synonyms = {
+            "怎么样": "如何 怎样 评价 体验",
+            "什么": "哪些 什么样的 何种",
+            "好不好": "质量如何 效果怎样 值得买吗",
+            "能不能": "是否可以 可以吗 能否",
+            "有没有": "是否有 存在 包含",
+            "为什么": "原因 为何 缘由",
+            "怎么办": "如何处理 解决方法 处理方式"
+        }
+        
+        # 购物场景特定扩展词
+        self.shopping_expansion_keywords = {
+            "手机": "智能手机 移动电话 通讯设备",
+            "电脑": "计算机 笔记本 台式机",
+            "衣服": "服装 服饰 穿搭",
+            "鞋子": "鞋类 运动鞋 休闲鞋",
+            "化妆品": "美妆 护肤品 彩妆",
+            "食品": "食物 零食 营养品",
+            "家电": "家用电器 电器设备 智能家居"
+        }
+    
+    def enable_query_rewriting(self, enable: bool = True):
+        """启用或禁用查询改写功能"""
+        self.rewriting_enabled = enable
+        
+    def set_rewrite_mode(self, mode: str = "auto"):
+        """设置查询改写模式"""
+        if mode in ["auto", "aggressive", "conservative"]:
+            self.rewrite_mode = mode
+        else:
+            logger.warning(f"无效的查询改写模式: {mode}，使用默认模式 'auto'")
+            self.rewrite_mode = "auto"
+        
+    def should_rewrite(self) -> bool:
+        """检查是否应该进行查询改写"""
+        return getattr(self, 'rewriting_enabled', True)
+    
+    def rewrite_query(self, query: str, context: str = "general", is_shopping_related: bool = True) -> str:
+        """统一的查询改写入口"""
+        if not self.should_rewrite():
+            return query
+            
+        # 根据改写模式调整强度
+        if self.rewrite_mode == "conservative":
+            # 保守模式：只做基本的同义词替换
+            return self._conservative_rewrite(query, context, is_shopping_related)
+        elif self.rewrite_mode == "aggressive":
+            # 激进模式：最大化扩展查询
+            return self._aggressive_rewrite(query, context, is_shopping_related)
+        else:  # auto模式
+            # 自动模式：根据上下文选择合适的改写策略
+            if context == "rag":
+                return self.rewrite_for_rag(query, is_shopping_related)
+            elif context == "search":
+                return self.rewrite_for_search(query, is_shopping_related)
+            elif context == "shopping":
+                return self.rewrite_for_shopping(query)
+            else:
+                return self.rewrite_for_general(query)
+    
+    def _conservative_rewrite(self, query: str, context: str, is_shopping_related: bool) -> str:
+        """保守模式改写"""
+        if is_shopping_related:
+            # 只替换核心购物词汇
+            rewritten = query
+            core_shopping_words = ["便宜", "贵", "好用", "靠谱", "假货"]
+            for word in core_shopping_words:
+                if word in self.shopping_synonyms and word in rewritten:
+                    expansion = self.shopping_synonyms[word].split()[0]  # 只取第一个同义词
+                    rewritten = rewritten.replace(word, f"{word} {expansion}")
+            return rewritten
+        else:
+            return self._normalize_query(query)
+    
+    def _aggressive_rewrite(self, query: str, context: str, is_shopping_related: bool) -> str:
+        """激进模式改写"""
+        if is_shopping_related:
+            rewritten = self.rewrite_for_shopping(query)
+            # 额外添加更多相关词汇
+            rewritten += " 用户体验 购买建议 专家评测 市场分析"
+            return rewritten
+        else:
+            rewritten = self.rewrite_for_general(query)
+            rewritten += " 详细信息 专业解答"
+            return rewritten
+    
+    def rewrite_for_shopping(self, query: str) -> str:
+        """针对购物场景的查询改写"""
+        rewritten = query
+        
+        # 先检查是否真的是购物相关查询
+        non_shopping_keywords = [
+            "电影", "电视剧", "电视", "音乐", "歌曲", "书籍", "小说", "游戏", "动漫", "综艺",
+            "影片", "剧集", "音乐会", "演出", "表演", "娱乐", "休闲", "观影", "看电影",
+            "天气", "新闻", "时事", "历史", "地理", "科学", "技术", "教育", "学习", "教程",
+            "健康", "医疗", "养生", "旅游", "景点", "攻略", "翻译", "计算", "转换",
+            "好看的电影", "电影推荐", "影评", "豆瓣", "评分", "导演", "演员", "剧情"
+        ]
+        
+        is_actually_shopping = True
+        query_lower = query.lower()
+        
+        # 如果包含明显的非购物关键词，进行保守改写
+        for keyword in non_shopping_keywords:
+            if keyword in query_lower:
+                is_actually_shopping = False
+                logger.info(f"检测到非购物关键词 '{keyword}'，将进行保守改写")
+                break
+        
+        if not is_actually_shopping:
+            # 对于非购物查询，只做基本的同义词替换，不添加购物词汇
+            for key, expansion in self.general_synonyms.items():
+                if key in rewritten:
+                    rewritten = rewritten.replace(key, f"{key} {expansion}")
+            return self._normalize_query(rewritten)
+        
+        # 真正的购物查询才进行完整改写
+        # 1. 同义词替换和扩展
+        for key, expansion in self.shopping_synonyms.items():
+            if key in rewritten:
+                rewritten = rewritten.replace(key, f"{key} {expansion}")
+        
+        # 2. 添加购物相关关键词
+        for product, keywords in self.shopping_expansion_keywords.items():
+            if product in rewritten:
+                rewritten = rewritten.replace(product, f"{product} {keywords}")
+        
+        # 3. 添加购物安全相关词汇 - 更精确的条件判断
+        shopping_intent_words = ["买", "购买", "选购", "购物"]
+        if any(word in query.lower() for word in shopping_intent_words):
+            rewritten += " 购物安全 正品保证 用户评价"
+        
+        # 4. 清理重复词汇
+        words = rewritten.split()
+        unique_words = []
+        seen = set()
+        for word in words:
+            if word not in seen:
+                unique_words.append(word)
+                seen.add(word)
+        
+        return " ".join(unique_words)
+    
+    def rewrite_for_general(self, query: str) -> str:
+        """针对一般场景的查询改写"""
+        rewritten = query
+        
+        # 1. 通用同义词替换
+        for key, expansion in self.general_synonyms.items():
+            if key in rewritten:
+                rewritten = rewritten.replace(key, f"{key} {expansion}")
+        
+        # 2. 规范化表达
+        rewritten = self._normalize_query(rewritten)
+        
+        return rewritten
+    
+    def rewrite_for_rag(self, query: str, is_shopping_related: bool = True) -> str:
+        """针对RAG检索的查询改写"""
+        if is_shopping_related:
+            # 购物相关查询，提取关键概念
+            rewritten = self._extract_shopping_concepts(query)
+        else:
+            # 一般查询，保持简洁
+            rewritten = self._simplify_for_rag(query)
+        
+        return rewritten
+    
+    def rewrite_for_search(self, query: str, is_shopping_related: bool = True) -> str:
+        """针对网络搜索的查询改写"""
+        # 检查是否是明显的非购物查询
+        non_shopping_keywords = [
+            "电影", "电视剧", "电视", "音乐", "歌曲", "书籍", "小说", "游戏", "动漫", "综艺",
+            "影片", "剧集", "音乐会", "演出", "表演", "娱乐", "休闲", "观影", "看电影",
+            "天气", "新闻", "时事", "历史", "地理", "科学", "技术", "教育", "学习", "教程",
+            "健康", "医疗", "养生", "旅游", "景点", "攻略", "翻译", "计算", "转换",
+            "好看的电影", "电影推荐", "影评", "豆瓣", "评分", "导演", "演员", "剧情"
+        ]
+        
+        query_lower = query.lower()
+        contains_non_shopping = any(keyword in query_lower for keyword in non_shopping_keywords)
+        
+        if is_shopping_related and not contains_non_shopping:
+            # 真正的购物搜索，添加搜索优化词汇
+            rewritten = self.rewrite_for_shopping(query)
+            rewritten += " 评测 对比 价格 购买指南"
+        else:
+            # 一般搜索或明显非购物搜索，保持查询意图清晰
+            rewritten = self.rewrite_for_general(query)
+            
+            # 对于特定类型的查询，添加相应的搜索优化词汇
+            if "电影" in query or "电视剧" in query:
+                rewritten += " 豆瓣 评分 影评"
+            elif "音乐" in query or "歌曲" in query:
+                rewritten += " 歌词 试听"
+            elif "天气" in query:
+                rewritten += " 预报 实时"
+        
+        # 移除过长的查询
+        if len(rewritten) > 200:
+            rewritten = rewritten[:200] + "..."
+        
+        return rewritten
+    
+    def _extract_shopping_concepts(self, query: str) -> str:
+        """提取购物相关的核心概念"""
+        # 先检查是否真的是购物查询
+        non_shopping_keywords = [
+            "电影", "电视剧", "电视", "音乐", "歌曲", "书籍", "小说", "游戏", "动漫", "综艺",
+            "影片", "剧集", "音乐会", "演出", "表演", "娱乐", "休闲", "观影", "看电影",
+            "天气", "新闻", "时事", "历史", "地理", "科学", "技术", "教育", "学习", "教程",
+            "健康", "医疗", "养生", "旅游", "景点", "攻略", "翻译", "计算", "转换",
+            "好看的电影", "电影推荐", "影评", "豆瓣", "评分", "导演", "演员", "剧情"
+        ]
+        
+        query_lower = query.lower()
+        contains_non_shopping = any(keyword in query_lower for keyword in non_shopping_keywords)
+        
+        if contains_non_shopping:
+            # 如果包含明显的非购物关键词，直接返回简化的查询
+            return self._simplify_for_rag(query)
+        
+        # 提取商品名称、品牌、特性等关键信息
+        concepts = []
+        
+        # 商品类别识别
+        for product in self.shopping_expansion_keywords.keys():
+            if product in query:
+                concepts.append(product)
+        
+        # 购物意图词汇
+        shopping_intents = ["购买", "选择", "推荐", "比较", "评价", "价格", "质量", "安全"]
+        for intent in shopping_intents:
+            if intent in query:
+                concepts.append(intent)
+        
+        # 如果没有提取到概念，使用原查询
+        if not concepts:
+            return query
+        
+        return " ".join(concepts) + " " + query
+    
+    def _simplify_for_rag(self, query: str) -> str:
+        """为RAG检索简化查询"""
+        # 移除停用词和冗余表达
+        stopwords = ["的", "了", "是", "在", "有", "和", "或", "但是", "然而", "因为", "所以"]
+        words = query.split()
+        filtered_words = [word for word in words if word not in stopwords]
+        return " ".join(filtered_words)
+    
+    def _normalize_query(self, query: str) -> str:
+        """规范化查询文本"""
+        # 移除多余的标点符号
+        query = re.sub(r'[？！。，；：\?!.,;:]+', ' ', query)
+        # 移除多余的空格
+        query = re.sub(r'\s+', ' ', query)
+        return query.strip()
+
+# 初始化查询改写器
+query_rewriter = QueryRewriter()
 
 # --- 本地运行服务器 ---
 if __name__ == "__main__" and not os.getenv("VERCEL"):
@@ -938,4 +1293,6 @@ if __name__ == "__main__" and not os.getenv("VERCEL"):
     logger.info(
         f"知识库条目数: {len(ALL_KNOWLEDGE_EMBEDDING_DATA) if ALL_KNOWLEDGE_EMBEDDING_DATA else 0}"
     )
+    logger.info(f"查询改写功能: {'可用' if query_rewriter else '不可用'}")
+    logger.info(f"查询改写模式: {getattr(query_rewriter, 'rewrite_mode', 'auto') if query_rewriter else '未知'}")
     uvicorn.run(app, host="0.0.0.0", port=8000)
