@@ -2,13 +2,18 @@
 import uuid           # 用于生成 requestId 和 sessionId，保证全局唯一性
 import time           # 用于计算请求耗时
 import requests       # HTTP 请求库
+import os
+from dotenv import load_dotenv
 from auth_util import gen_sign_headers  # 自定义模块，用于生成签名相关 Header 参数
+
+# 加载环境变量
+load_dotenv()
 
 # ===================== 接口配置信息 =====================
 
-# 请根据 vivo AI 平台分配的值替换为你自己团队的 APP_ID 和 APP_KEY
-APP_ID = '2025863341'
-APP_KEY = 'ShRBDpAqGvISQKOb'
+# vivo AI 平台分配的 APP_ID 和 APP_KEY（从环境变量中读取）
+APP_ID = os.getenv('VIVO_APP_ID')
+APP_KEY = os.getenv('VIVO_APP_KEY')
 
 # 接口路径（固定）,这个 URI 是蓝心大模型的 API 接口地址
 URI = '/vivogpt/completions'
