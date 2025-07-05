@@ -53,6 +53,9 @@ class ChatCompletionRequest(BaseModel):
     # 新增RAG控制参数
     enable_rag: Optional[bool] = True  # 默认开启RAG
     rag_top_k: Optional[int] = 1       # RAG检索数量
+    # 新增查询改写控制参数
+    enable_query_rewriting: Optional[bool] = True  # 默认开启查询改写
+    query_rewrite_mode: Optional[str] = "auto"     # 改写模式：auto/aggressive/conservative
 
 class ChatCompletionResponseChoice(BaseModel):
     index: int
