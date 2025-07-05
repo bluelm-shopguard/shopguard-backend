@@ -1,6 +1,6 @@
 # vivo BlueLM OpenAI-Compatible API Server 🚀
 
-一个功能完整的基于 vivo BlueLM 大模型的 OpenAI 兼容 API 服务器，专为购物反诈场景设计，集成多模态处理、RAG 检索增强、智能 Web 搜索、流式输出、会话管理等企业级功能。
+一个功能完整的基于 vivo BlueLM 大模型的 OpenAI 兼容 API 服务器，专为购物反诈场景设计，集成多模态处理、RAG 检索增强、智能查询改写、Web 搜索、流式输出、会话管理等企业级功能。
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.8+-green.svg)
@@ -11,6 +11,7 @@
 
 - [🚀 核心特性](#-核心特性)
 - [💡 应用场景](#-应用场景)
+- [📚 项目文档](#-项目文档)
 - [📋 系统要求](#-系统要求)
 - [🛠️ 快速开始](#️-快速开始)
 - [📚 完整 API 文档](#-完整-api-文档)
@@ -22,10 +23,32 @@
 - [🔧 故障排除](#-故障排除)
 - [🤝 贡献指南](#-贡献指南)
 
+## 项目结构
+
+```
+/
+├── docs/                   # MkDocs 文档源文件
+├── knowledge_base/         # 原始知识库文件
+├── knowledge_base_embeddings/ # 向量化后的知识库
+├── static/                 # 静态文件 (例如: 前端页面)
+├── test/                   # 测试代码
+├── auth_util.py            # 认证工具模块
+├── Dockerfile              # Docker 部署文件
+├── function_call.py        # 工具调用管理模块
+├── mkdocs.yml              # MkDocs 配置文件
+├── MultiModal.py           # 多模态处理引擎
+├── newserver.py            # FastAPI 服务器主程序
+├── prompt.py               # 提示词工程模块
+├── rag.py                  # RAG 检索增强模块
+├── requirements.txt        # Python 依赖
+├── schemas.py              # 数据模型定义
+└── vivogpt.py              # vivo BlueLM 模型调用核心
+```
+
 ## 🚀 核心特性
 
 ### 🎯 专业反诈能力
-- **智能风险评估**：基于丰富的反诈知识库，自动识别虚假购物、投资理财、冒充公检法等多种诈骗类型
+- **智能风险评估**：基于丰富的反诈知识库，自动识别多种购物诈骗类型
 - **多维度风险分析**：从价格合理性、平台可信度、付款方式、商品描述等多个维度进行综合评估
 - **星级风险评分**：提供 0-10 星的直观风险评分系统，帮助用户快速判断风险等级
 
@@ -45,6 +68,12 @@
 - **语义检索**：使用 m3e-base 模型进行高质量语义相似度匹配
 - **动态上下文**：实时检索相关知识，增强模型回答的准确性和专业性
 - **可控检索**：用户可自主选择是否启用 RAG 和检索数量
+
+### 🔄 智能查询改写
+- **自适应优化**：根据查询内容自动优化搜索和检索效果
+- **多模式支持**：提供保守、激进、自动三种改写策略
+- **场景识别**：区分购物咨询和通用对话，采用不同改写策略
+- **可控开关**：用户可自主选择是否启用查询改写功能
 
 ### 🌐 智能 Web 搜索
 - **多搜索引擎**：集成标准搜索、搜狗、夸克、必应等多个搜索引擎
@@ -84,6 +113,22 @@
 - **数据分析**：提供诈骗趋势分析和统计数据
 - **教学辅助**：辅助反诈相关课程的教学工作
 
+## 📚 项目文档
+
+本项目使用 MkDocs 生成文档。你可以在 `docs` 目录中找到所有文档的 Markdown 源文件。
+
+要本地预览文档网站，请运行：
+
+```bash
+# 安装 MkDocs
+pip install mkdocs
+
+# 启动本地文档服务器
+mkdocs serve
+```
+
+然后访问 `http://127.0.0.1:8000` 即可查看。
+
 ## 📋 系统要求
 
 ### 基础环境
@@ -112,8 +157,8 @@ python-dotenv>=1.0.0
 
 ```bash
 # 克隆项目
-git clone https://github.com/your-org/vivo-bluelm-server.git
-cd vivo-bluelm-server
+git clone https://github.com/bluelm-shopguard/shopguard-backend.git
+cd shopguard-backend
 
 # 创建虚拟环境（推荐）
 python -m venv venv
@@ -242,6 +287,8 @@ POST /v1/chat/completions
 | `user` | string | ❌ | - | 用户标识符 |
 | `enable_rag` | boolean | ❌ | true | 是否启用 RAG 检索 |
 | `rag_top_k` | integer | ❌ | 2 | RAG 检索返回条数 |
+| `enable_query_rewriting` | boolean | ❌ | true | 是否启用查询改写 |
+| `query_rewrite_mode` | string | ❌ | auto | 改写模式: auto/aggressive/conservative |
 | `extra` | object | ❌ | {} | 额外的模型参数 |
 
 **消息格式支持：**
@@ -342,9 +389,34 @@ GET /
   "message": "OpenAI-Compatible Server for vivo BlueLM",
   "version": "1.0.0",
   "endpoints": ["/v1/models", "/v1/chat/completions"],
-  "features": ["RAG", "MultiModal", "WebSearch", "ConversationHistory", "StreamingResponse"]
+  "features": ["RAG", "MultiModal", "WebSearch", "ConversationHistory", "StreamingResponse", "QueryRewriting"]
 }
 ```
+
+### 🔄 查询改写使用示例
+
+查询改写功能可以智能优化用户的查询文本，提高搜索和检索效果：
+
+```json
+{
+  "model": "vivo-BlueLM-TB-Pro",
+  "messages": [
+    {"role": "user", "content": "这手机1999靠谱吗"}
+  ],
+  "enable_query_rewriting": true,
+  "query_rewrite_mode": "auto",
+  "enable_rag": true,
+  "rag_top_k": 2
+}
+```
+
+**改写模式说明：**
+- `auto`：自动判断是否需要改写（默认）
+- `aggressive`：积极改写，更详细的查询优化
+- `conservative`：保守改写，仅做基础优化
+
+**原始查询**：`"这手机1999靠谱吗"`
+**改写后**：`"手机 1999元 价格 可信度 购物风险 平台评估"`
 
 ## 🏗️ 系统架构
 
@@ -363,13 +435,24 @@ GET /
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Core Processing Engine                       │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │   MultiModal    │  │   RAG System    │  │  Function Call  │ │
-│  │   Processing    │◄─┤   Retrieval     │◄─┤   & Web Search  │ │
+│  │   MultiModal    │  │ Query Rewriting │  │   RAG System    │ │
+│  │   Processing    │◄─┤   & Optimizer   │◄─┤   Retrieval     │ │
 │  │                 │  │                 │  │                 │ │
-│  │ • OCR Extract   │  │ • Vector Search │  │ • Auto Function │ │
-│  │ • Image Understand│  │ • Semantic Match│  │ • Multi-Engine │ │
-│  │ • Base64 Handle │  │ • Context Enrich│  │ • Result Summary│ │
+│  │ • OCR Extract   │  │ • Auto/Aggressive│  │ • Vector Search │ │
+│  │ • Image Understand│  │ • Conservative  │  │ • Semantic Match│ │
+│  │ • Base64 Handle │  │ • Shopping Focus│  │ • Context Enrich│ │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
+│                                │                               │
+│                                ▼                               │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │              Function Call & Web Search                 │   │
+│  │  ┌─────────────────┐    ┌─────────────────┐           │   │
+│  │  │ Auto Function   │    │  Multi-Engine   │           │   │
+│  │  │ Call Detection  │    │  Web Search     │           │   │
+│  │  │ • APIs Parse    │    │ • Smart Summary │           │   │
+│  │  │ • Result Format │    │ • Real-time Info│           │   │
+│  │  └─────────────────┘    └─────────────────┘           │   │
+│  └─────────────────────────────────────────────────────────┘   │
 │                                │                               │
 │                                ▼                               │
 │  ┌─────────────────────────────────────────────────────────┐   │
@@ -403,13 +486,14 @@ GET /
 2. **消息解析**：支持文本、多模态、OpenAI Vision 等多种格式
 3. **多模态处理**：OCR 文字提取 + 图片内容理解
 4. **购物相关性判断**：自动识别是否为购物相关咨询
-5. **RAG 检索**：根据用户查询检索相关反诈知识
-6. **第一次 LLM 调用**：判断是否需要工具调用
-7. **Web 搜索**：根据需要进行联网搜索
-8. **搜索结果处理**：智能摘要压缩长结果
-9. **第二次 LLM 调用**：生成最终回复
-10. **响应格式化**：标准化 OpenAI 格式输出
-11. **会话历史更新**：保存对话记录
+5. **查询改写**：根据模式设置优化查询文本，提高检索精度
+6. **RAG 检索**：根据改写后的查询检索相关反诈知识
+7. **第一次 LLM 调用**：判断是否需要工具调用
+8. **Web 搜索**：根据需要进行联网搜索（使用改写后的查询）
+9. **搜索结果处理**：智能摘要压缩长结果
+10. **第二次 LLM 调用**：生成最终回复
+11. **响应格式化**：标准化 OpenAI 格式输出
+12. **会话历史更新**：保存对话记录
 
 ### 📦 模块详细说明
 
@@ -537,18 +621,24 @@ RAG_CONFIG = {
 ```python
 # 搜索引擎配置
 SEARCH_CONFIG = {
-    "default_engine": "search_std",
-    "available_engines": [
-        "search_std",
-        "search_pro",
-        "search_pro_sogou",
-        "search_pro_quark",
-        "search_pro_jina",
-        "search_pro_bing"
-    ],
-    "default_count": 4,
-    "content_size": "medium",
-    "timeout_seconds": 10
+   # Web搜索引擎配置
+   SEARCH_CONFIG = {
+      "default_engine": "search_std",       
+      "search_engines": {                   
+         "search_std": "标准搜索",
+         "sogou": "搜狗搜索", 
+         "quark": "夸克搜索",
+         "bing": "必应搜索"
+      },
+      "search_intent": True,                
+      "default_count": 4,                   
+      "max_count": 10,                      
+      "search_domain_filter": None,         
+      "search_recency_filter": "noLimit",   
+      "content_size": "small",              
+      "user_id"=None
+      "Request_id"=None             
+   }
 }
 ```
 
@@ -787,6 +877,6 @@ LOGGING_CONFIG = {
 
 ---
 
-**版本**: 1.0.0  
-**最后更新**: 2025年6月20日  
-**维护者**: xxx 团队
+**版本**: 3.0.0  
+**最后更新**: 2025年7月5日  
+**维护者**: bluelm-shopguard团队
