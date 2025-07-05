@@ -124,7 +124,7 @@
 pip install mkdocs
 
 # 启动本地文档服务器
-mkdocs serve
+mkdocs server
 ```
 
 然后访问 `http://127.0.0.1:8000` 即可查看。
