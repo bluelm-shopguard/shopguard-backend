@@ -1,69 +1,70 @@
-# Documentation Index 📖
+# 文档目录 📖
 
-Welcome to the ShopGuard Backend documentation. This directory contains focused guides for different aspects of the service.
+欢迎使用 ShopGuard 后端服务文档。此目录包含服务各个方面的详细指南。
 
-## Quick Navigation
+## 快速导航
 
-### Getting Started
+### 入门指南
 
-- **[Quick Start Guide](quick-start.md)** - Get up and running in 5 minutes
-- **[Configuration Guide](configuration-guide.md)** - Complete configuration reference
+- **[快速开始指南](quick-start.md)** - 5分钟快速上手
+- **[配置指南](configuration-guide.md)** - 完整配置参考
 
-### API Documentation
+### API 文档
 
-- **[API Reference](api-reference.md)** - Complete API documentation
-- **[How to Use Image Input](how-to-image-input.md)** - Multimodal image processing guide
-- **[How to Use Web Search](how-to-web-search.md)** - Web search functionality guide
+- **[API 参考](api-reference.md)** - 完整的 API 文档
+- **[如何使用图片输入](how-to-image-input.md)** - 多模态图片处理指南
+- **[如何使用网络搜索](how-to-web-search.md)** - 网络搜索功能指南
 
-### Deployment
+### 部署
 
-- **[Production Deployment](production-deployment.md)** - Production deployment guide
+- **[生产环境部署](production-deployment.md)** - 生产环境部署指南
 
-### Existing Guides
+### 现有指南
 
-- **[Host Docker Image in China](host%20docker%20image%20and%20server%20in%20China.md)** - Deployment in China
-- **[SSH to Aliyun ECS](how%20to%20ssh%20aliyun%20ECS.md)** - Aliyun server management
+- **[在中国部署 Docker 镜像](host%20docker%20image%20and%20server%20in%20China.md)** - 在中国的部署
+- **[SSH 连接阿里云 ECS](how%20to%20ssh%20aliyun%20ECS.md)** - 阿里云服务器管理
 
-## Documentation Structure
+## 文档结构
 
 ```
-docs/
-├── README.md                           # This index file
-├── quick-start.md                      # 🚀 5-minute setup guide
-├── api-reference.md                    # 📚 Complete API docs
-├── how-to-image-input.md              # 🖼️ Image processing guide
-├── how-to-web-search.md               # 🔍 Web search guide
-├── configuration-guide.md             # ⚙️ Configuration reference
-├── production-deployment.md           # 🏭 Production deployment
+docs_CN/
+├── README.md                           # 此目录文件
+├── quick-start.md                      # 🚀 5分钟设置指南
+├── api-reference.md                    # 📚 完整 API 文档
+├── how-to-image-input.md              # 🖼️ 图片处理指南
+├── how-to-web-search.md               # 🔍 网络搜索指南
+├── configuration-guide.md             # ⚙️ 配置参考
+├── production-deployment.md           # 🏭 生产环境部署
 ├── host docker image and server in China.md
 └── how to ssh aliyun ECS.md
 ```
 
-## Quick Reference
+## 快速参考
 
-### Core Features
+### 核心功能
 
-- **OpenAI-Compatible API** - Drop-in replacement for OpenAI API
-- **Shopping Fraud Detection** - Specialized for e-commerce security
-- **Multimodal Processing** - Text + image analysis
-- **RAG Knowledge Base** - 10,000+ fraud prevention examples
-- **Web Search Integration** - Real-time information retrieval
-- **Streaming Support** - Real-time response streaming
+- **OpenAI 兼容 API** - OpenAI API 的直接替代品
+- **购物欺诈检测** - 专门针对电商安全
+- **多模态处理** - 文本 + 图像分析
+- **检索增强生成** - 更精确的回复
+- **RAG 知识库** - 10,000+ 欺诈防护案例
+- **网络搜索集成** - 实时信息检索
+- **流式支持** - 实时响应流
 
-### Supported Models
+### 支持的模型
 
-- `vivo-BlueLM-TB-Pro` - Text-only model for conversations
-- `vivo-BlueLM-V-2.0` - Multimodal model for image + text
+- `vivo-BlueLM-TB-Pro` - 纯文本对话模型
+- `vivo-BlueLM-V-2.0` - 图像 + 文本多模态模型
 
-### Key Endpoints
+### 关键端点
 
-- `POST /v1/chat/completions` - Main chat API
-- `GET /v1/models` - List available models
-- `GET /v1/health` - Service health check
+- `POST /v1/chat/completions` - 主要聊天 API
+- `GET /v1/models` - 列出可用模型
+- `GET /v1/health` - 服务健康检查
 
-## Quick Examples
+## 快速示例
 
-### Text Query
+### 文本查询
 
 ```bash
 curl -X POST "http://localhost:8000/v1/chat/completions" \
@@ -74,7 +75,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
   }'
 ```
 
-### Image Analysis
+### 图像分析
 
 ```bash
 curl -X POST "http://localhost:8000/v1/chat/completions" \
@@ -91,65 +92,10 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
   }'
 ```
 
-## Getting Help
+## 获取帮助
 
-### For Developers
+### 面向开发者
 
-1. Start with [Quick Start Guide](quick-start.md)
-2. Check [API Reference](api-reference.md) for detailed usage
-3. Explore feature-specific guides for advanced usage
-
-### For DevOps
-
-1. Follow [Production Deployment](production-deployment.md)
-2. Reference [Configuration Guide](configuration-guide.md) for tuning
-3. Check existing China deployment guides for regional setup
-
-### For Integration
-
-1. Review [API Reference](api-reference.md) for request/response formats
-2. See [Image Input Guide](how-to-image-input.md) for multimodal features
-3. Check [Web Search Guide](how-to-web-search.md) for enhanced capabilities
-
-## Documentation Status
-
-| Guide | Status | Last Updated |
-|-------|--------|--------------|
-| Quick Start | ✅ Complete | 2025-01-01 |
-| API Reference | ✅ Complete | 2025-01-01 |
-| Image Input | ✅ Complete | 2025-01-01 |
-| Web Search | ✅ Complete | 2025-01-01 |
-| Configuration | ✅ Complete | 2025-01-01 |
-| Production Deployment | ✅ Complete | 2025-01-01 |
-| China Deployment | ✅ Existing | Earlier |
-| SSH Guide | ✅ Existing | Earlier |
-
-## Contributing to Documentation
-
-To improve the documentation:
-
-1. **For new features**: Create focused how-to guides
-2. **For clarifications**: Update existing guides
-3. **For examples**: Add to relevant sections
-4. **For corrections**: Submit pull requests
-
-### Documentation Standards
-
-- Use clear, actionable titles
-- Include working code examples
-- Provide troubleshooting sections
-- Follow markdown best practices
-- Test all commands and examples
-
-## Feedback
-
-Found an issue or have a suggestion? Please:
-
-- Open a GitHub issue
-- Submit a pull request
-- Contact the maintainers
-
----
-
-**Last Updated**: January 1, 2025  
-**Documentation Version**: 1.0.0
+1. 从[快速开始指南](quick-start.md)开始
+2. 查看[API 参考](api-reference.md)了解详细使用方法
+3. 探索功能专用指南以了解高级用法

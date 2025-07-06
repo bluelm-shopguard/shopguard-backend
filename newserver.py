@@ -45,8 +45,17 @@ from schemas import (
 
 # --- 日志和应用初始化 ---
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, 
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler()
+    ]
 )
+# 设置日志编码
+for handler in logging.getLogger().handlers:
+    if hasattr(handler, 'setEncoding'):
+        handler.setEncoding('utf-8')
+
 logger = logging.getLogger(__name__)
 
 app = FastAPI(

@@ -1,18 +1,18 @@
-# How to Use Image Input 🖼️
+# 如何使用图片输入 🖼️
 
-This guide explains how to send images to the ShopGuard backend service for analysis.
+本指南说明如何向 ShopGuard 后端服务发送图片以进行分析。
 
-## Supported Image Formats
+## 支持的图片格式
 
-The service supports multiple image input formats through the `/v1/chat/completions` endpoint:
+该服务通过 `/v1/chat/completions` 端点支持多种图片输入格式：
 
-### 1. OpenAI Vision Format (Recommended)
+### 1. OpenAI 视觉格式（推荐）
 
-Send images with text using the standard OpenAI Vision API format:
+使用标准的 OpenAI 视觉 API 格式发送图片和文本：
 
 ```json
 {
-  "model": "vivo-BlueLM-V-2.0",
+  "model": "vivo-BlueLM-TB-Pro",
   "messages": [
     {
       "role": "user",
@@ -33,13 +33,13 @@ Send images with text using the standard OpenAI Vision API format:
 }
 ```
 
-### 2. Base64 Image Format
+### 2. Base64 图片格式
 
-Send only base64 encoded images:
+仅发送 base64 编码的图片：
 
 ```json
 {
-  "model": "vivo-BlueLM-V-2.0", 
+  "model": "vivo-BlueLM-TB-Pro", 
   "messages": [
     {
       "role": "user",
@@ -49,13 +49,13 @@ Send only base64 encoded images:
 }
 ```
 
-### 3. Mixed Content Format
+### 3. 混合内容格式
 
-Send multiple images with text using custom content types:
+使用自定义内容类型发送多个图片和文本：
 
 ```json
 {
-  "model": "vivo-BlueLM-V-2.0",
+  "model": "vivo-BlueLM-TB-Pro",
   "messages": [
     {
       "role": "user",
@@ -71,33 +71,33 @@ Send multiple images with text using custom content types:
 }
 ```
 
-## Image Processing Capabilities
+## 图片处理能力
 
-### OCR Text Extraction
+### OCR 文字提取
 
-The service can extract text from images using the `extract_text` function:
+该服务可以使用 `extract_text` 功能从图片中提取文字：
 
-- **Supported formats**: JPEG, PNG, WebP, GIF
-- **Use cases**: Screenshots, product labels, chat conversations
-- **Accuracy**: High precision text recognition
+- **支持格式**: JPEG, PNG, WebP, GIF
+- **使用场景**: 屏幕截图、产品标签、聊天对话
+- **准确性**: 高精度文字识别
 
-### Image Understanding  
+### 图片理解  
 
-The service provides detailed image analysis using the `interpret_image` function:
+该服务使用 `interpret_image` 功能提供详细的图片分析：
 
-- **Scene analysis**: Shopping pages, product images, conversations
-- **Object detection**: Products, prices, promotional banners
-- **Context understanding**: Shopping fraud detection scenarios
+- **场景分析**: 购物页面、产品图片、对话
+- **物体检测**: 产品、价格、促销横幅
+- **上下文理解**: 购物欺诈检测场景
 
-## cURL Examples
+## cURL 示例
 
-### Basic Image Analysis
+### 基本图片分析
 
 ```bash
 curl -X POST "http://localhost:8000/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "vivo-BlueLM-V-2.0",
+    "model": "vivo-BlueLM-TB-Pro",
     "messages": [
       {
         "role": "user",
@@ -118,13 +118,13 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
   }'
 ```
 
-### Shopping Analysis with Web Search
+### 购物分析结合网络搜索
 
 ```bash
 curl -X POST "http://localhost:8000/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "vivo-BlueLM-V-2.0",
+    "model": "vivo-BlueLM-TB-Pro",
     "messages": [
       {
         "role": "user",
@@ -147,20 +147,20 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
   }'
 ```
 
-## Python Client Example
+## Python 客户端示例
 
 ```python
 import requests
 import base64
 
 def analyze_image(image_path, question):
-    # Read and encode image
+    # 读取并编码图片
     with open(image_path, "rb") as image_file:
         base64_image = base64.b64encode(image_file.read()).decode('utf-8')
     
-    # Prepare request
+    # 准备请求
     payload = {
-        "model": "vivo-BlueLM-V-2.0",
+        "model": "vivo-BlueLM-TB-Pro",
         "messages": [
             {
                 "role": "user",
@@ -182,7 +182,7 @@ def analyze_image(image_path, question):
         "user_type": "普通用户"
     }
     
-    # Send request
+    # 发送请求
     response = requests.post(
         "http://localhost:8000/v1/chat/completions",
         json=payload,
@@ -191,7 +191,7 @@ def analyze_image(image_path, question):
     
     return response.json()
 
-# Usage
+# 使用方法
 result = analyze_image(
     "product_screenshot.jpg", 
     "这个商品页面是否可靠？价格是否合理？"
@@ -199,21 +199,21 @@ result = analyze_image(
 print(result['choices'][0]['message']['content'])
 ```
 
-## Best Practices
+## 最佳实践
 
-### Image Quality
+### 图片质量
 
-- **Resolution**: Higher resolution images provide better OCR accuracy
-- **Format**: JPEG and PNG are preferred formats
-- **Size**: Images should be under 10MB for optimal processing
+- **分辨率**: 更高分辨率的图片提供更好的 OCR 准确性
+- **格式**: 推荐使用 JPEG 和 PNG 格式
+- **大小**: 图片应在 10MB 以下以获得最佳处理效果
 
-### Query Optimization
+### 查询优化
 
-- **Specific questions**: Ask targeted questions about fraud detection
-- **Context**: Provide context about what type of analysis you need
-- **Multiple angles**: For complex scenarios, send multiple images
+- **具体问题**: 针对欺诈检测提出有针对性的问题
+- **上下文**: 提供需要什么类型分析的上下文
+- **多角度**: 对于复杂场景，发送多张图片
 
-### Error Handling
+### 错误处理
 
 ```python
 try:
@@ -222,61 +222,61 @@ try:
     result = response.json()
     
     if 'error' in result:
-        print(f"API Error: {result['error']['message']}")
+        print(f"API 错误: {result['error']['message']}")
     else:
         print(result['choices'][0]['message']['content'])
         
 except requests.exceptions.RequestException as e:
-    print(f"Request failed: {e}")
+    print(f"请求失败: {e}")
 ```
 
-## Common Use Cases
+## 常见使用场景
 
-### 1. Shopping Screenshot Analysis
+### 1. 购物截图分析
 
-Analyze product pages, shopping apps, or e-commerce platforms for fraud indicators.
+分析产品页面、购物应用程序或电商平台的欺诈指标。
 
-### 2. Chat Conversation Analysis  
+### 2. 聊天对话分析  
 
-Examine conversation screenshots to identify suspicious communication patterns.
+检查对话截图以识别可疑的沟通模式。
 
-### 3. Price Comparison
+### 3. 价格比较
 
-Compare product prices in images with current market rates through web search.
+将图片中的产品价格与当前市场价格进行比较（通过网络搜索）。
 
-### 4. Platform Verification
+### 4. 平台验证
 
-Verify if shopping platforms or apps shown in images are legitimate.
+验证图片中显示的购物平台或应用程序是否合法。
 
-## Troubleshooting
+## 故障排除
 
-### Common Issues
+### 常见问题
 
-1. **Base64 encoding errors**
-   - Ensure proper base64 encoding without newlines
-   - Check image file format compatibility
+1. **Base64 编码错误**
+   - 确保正确的 base64 编码且无换行符
+   - 检查图片文件格式兼容性
 
-2. **Image too large**
-   - Compress images before sending
-   - Consider resizing to reduce file size
+2. **图片过大**
+   - 发送前压缩图片
+   - 考虑调整大小以减少文件大小
 
-3. **Poor OCR results**
-   - Ensure image has good contrast
-   - Check if text is clearly visible
-   - Try different image preprocessing
+3. **OCR 结果不佳**
+   - 确保图片有良好的对比度
+   - 检查文字是否清晰可见
+   - 尝试不同的图片预处理
 
-### Getting Help
+### 获取帮助
 
-If you encounter issues with image processing:
+如果遇到图片处理问题：
 
-1. Check the service health endpoint: `GET /v1/health`
-2. Verify your image encoding is correct
-3. Test with simpler images first
-4. Review the error messages in the response
+1. 检查服务健康端点：`GET /v1/health`
+2. 验证您的图片编码是否正确
+3. 先使用简单的图片进行测试
+4. 查看响应中的错误消息
 
-## Model Selection
+## 模型选择
 
-- **vivo-BlueLM-V-2.0**: Use for multimodal (image + text) analysis
-- **vivo-BlueLM-TB-Pro**: Text-only model, cannot process images
+- **vivo-BlueLM-V-2.0**: 用于多模态（图像 + 文本）分析
+- **vivo-BlueLM-TB-Pro**: 仅限文本模型，无法处理图片
 
-Always use `vivo-BlueLM-V-2.0` when sending images to ensure proper processing.
+在发送图片时，工作流会自动调用`vivo-BlueLM-V-2.0`进行多模态处理，因此应始终使用 `vivo-BlueLM-TB-Pro` 以确保最终的正确处理。

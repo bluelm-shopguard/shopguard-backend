@@ -1,52 +1,52 @@
-# Quick Start Guide 🚀
+# 快速开始指南 🚀
 
-Get the ShopGuard backend service up and running in minutes.
+让 ShopGuard 后端服务在几分钟内启动运行。
 
-## Prerequisites
+## 前提条件
 
-Before starting, ensure you have:
+开始之前，请确保您已安装：
 
-- **Python 3.8+** (Python 3.9+ recommended)
-- **vivo AI Platform Account** with valid APP_ID and APP_KEY
-- **Git** for cloning the repository
+- **Python 3.8+** (推荐 Python 3.9+)
+- **vivo AI 平台账户**，拥有有效的 APP_ID 和 APP_KEY
+- **Git** 用于克隆仓库
 
-## Step 1: Clone and Setup
+## 步骤 1：克隆和设置
 
 ```bash
-# Clone the repository
+# 克隆仓库
 git clone https://github.com/your-org/shopguard-backend.git
 cd shopguard-backend
 
-# Create virtual environment (recommended)
+# 创建虚拟环境（推荐）
 python -m venv venv
 
-# Activate virtual environment
+# 激活虚拟环境
 # Linux/Mac:
 source venv/bin/activate
 # Windows:
 # venv\Scripts\activate
 
-# Install dependencies
+# 安装依赖
 pip install -r requirements.txt
 ```
 
-## Step 2: Environment Configuration
+## 步骤 2：环境配置
 
-Create your environment configuration:
+创建您的环境配置：
 
 ```bash
-# Copy environment template
+# 复制环境模板
 cp .env.example .env
 ```
 
-Edit `.env` file with your credentials:
+编辑 `.env` 文件添加您的凭证：
 
 ```properties
-# vivo AI Platform Configuration
+# vivo AI 平台配置
 VIVO_APP_ID=your_app_id_here
 VIVO_APP_KEY=your_app_key_here
 
-# API Endpoints (use defaults)
+# API 端点（使用默认值）
 VIVOGPT_API_URI=/vivogpt/completions
 VIVOGPT_API_DOMAIN=api-ai.vivo.com.cn
 MULTIMODAL_URI=/vivogpt/completions
@@ -54,46 +54,46 @@ MULTIMODAL_DOMAIN=api-ai.vivo.com.cn
 RAG_API_URI=/embedding-model-api/predict/batch
 RAG_API_DOMAIN=api-ai.vivo.com.cn
 
-# Web Search (optional)
+# 网络搜索（可选）
 WEB_SEARCH_API_KEY=your_search_api_key
 WEB_SEARCH_URL=https://open.bigmodel.cn/api/paas/v4/web_search
 
-# Server Configuration
+# 服务器配置
 SERVER_HOST=0.0.0.0
 SERVER_PORT=8000
 ```
 
-## Step 3: Verify Knowledge Base
+## 步骤 3：验证知识库
 
-Check if the knowledge base files exist:
+检查知识库文件是否存在：
 
 ```bash
-# Check for knowledge base files
+# 检查知识库文件
 ls -la knowledge_base_embeddings/
 
-# You should see:
+# 您应该看到：
 # all_knowledge_embeddings.json
 ```
 
-If the files are missing, contact the project maintainer to obtain them.
+如果文件缺失，请联系项目维护者获取这些文件。
 
-## Step 4: Start the Service
+## 步骤 4：启动服务
 
-### Development Mode
+### 开发模式
 
 ```bash
-# Start with Python directly
+# 直接使用 Python 启动
 python newserver.py
 ```
 
-### Production Mode (Recommended)
+### 生产模式（推荐）
 
 ```bash
-# Start with uvicorn
+# 使用 uvicorn 启动
 uvicorn newserver:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-You should see output like:
+您应该看到类似这样的输出：
 
 ```
 INFO:     Started server process [12345]
@@ -102,15 +102,15 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000
 ```
 
-## Step 5: Verify Installation
+## 步骤 5：验证安装
 
-### Health Check
+### 健康检查
 
 ```bash
 curl http://localhost:8000/v1/health
 ```
 
-Expected response:
+期望的响应：
 
 ```json
 {
@@ -125,13 +125,13 @@ Expected response:
 }
 ```
 
-### Check Available Models
+### 检查可用模型
 
 ```bash
 curl http://localhost:8000/v1/models
 ```
 
-Expected response:
+期望的响应：
 
 ```json
 {
@@ -153,9 +153,11 @@ Expected response:
 }
 ```
 
-## Step 6: Test Basic Functionality
+## 步骤 6：测试基本功能
 
-### Text-Only Query
+### 纯文本查询
+
+如果您使用的是Linux:
 
 ```bash
 curl -X POST "http://localhost:8000/v1/chat/completions" \
@@ -171,9 +173,15 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
   }'
 ```
 
-### Test with Python
+如果您使用的是Windows Powershell:
 
-Create `test_api.py`:
+```bash
+Invoke-RestMethod -Uri "http://localhost:8000/v1/chat/completions" -Method POST -ContentType "application/json" -Body '{"model": "vivo-BlueLM-TB-Pro", "messages": [{"role": "user", "content": "有人要我转账1000元买iPhone，说是特价，这靠谱吗？"}]}'
+```
+
+### 使用 Python 测试
+
+创建 `test_api.py`：
 
 ```python
 import requests
@@ -198,55 +206,55 @@ def test_basic_query():
         response.raise_for_status()
         
         result = response.json()
-        print("✅ API Response Success!")
-        print(f"Response: {result['choices'][0]['message']['content']}")
+        print("✅ API 响应成功!")
+        print(f"响应: {result['choices'][0]['message']['content']}")
         
     except Exception as e:
-        print(f"❌ API Test Failed: {e}")
+        print(f"❌ API 测试失败: {e}")
 
 if __name__ == "__main__":
     test_basic_query()
 ```
 
-Run the test:
+运行测试：
 
 ```bash
 python test_api.py
 ```
 
-## Configuration Options
+## 配置选项
 
-### Essential Settings
+### 基本设置
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `VIVO_APP_ID` | Your vivo AI platform app ID | ✅ |
-| `VIVO_APP_KEY` | Your vivo AI platform app key | ✅ |
-| `WEB_SEARCH_API_KEY` | Web search service API key | ❌ |
+| 变量 | 说明 | 必需 |
+|------|------|------|
+| `VIVO_APP_ID` | 您的 vivo AI 平台应用 ID | ✅ |
+| `VIVO_APP_KEY` | 您的 vivo AI 平台应用密钥 | ✅ |
+| `WEB_SEARCH_API_KEY` | 网络搜索服务 API 密钥 | ❌ |
 
-### Optional Performance Settings
+### 可选性能设置
 
 ```properties
-# Performance Configuration
+# 性能配置
 MAX_CONCURRENT_REQUESTS=100
 REQUEST_TIMEOUT_SECONDS=30
 RAG_CACHE_TTL_SECONDS=3600
 CONVERSATION_HISTORY_LIMIT=100
 
-# Logging
+# 日志
 LOG_LEVEL=INFO
 DEBUG_MODE=false
 ```
 
-## Docker Quick Start (Alternative)
+## Docker 快速启动（备选）
 
-If you prefer Docker:
+如果您偏好使用 Docker：
 
 ```bash
-# Build Docker image
+# 构建 Docker 镜像
 docker build -t shopguard-backend .
 
-# Run container
+# 运行容器
 docker run -d \
   --name shopguard \
   -p 8000:8000 \
@@ -255,116 +263,116 @@ docker run -d \
   shopguard-backend
 ```
 
-## Common Issues and Solutions
+## 常见问题和解决方案
 
-### Issue: "ImportError: No module named 'XXX'"
+### 问题："ImportError: No module named 'XXX'"
 
-**Solution**: Install missing dependencies
+**解决方案**：安装缺失的依赖
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Issue: "RAG system not available"
+### 问题："RAG system not available"
 
-**Solution**: Check knowledge base files
+**解决方案**：检查知识库文件
 
 ```bash
-# Verify files exist
+# 验证文件存在
 ls -la knowledge_base_embeddings/all_knowledge_embeddings.json
 
-# If missing, contact maintainer for knowledge base files
+# 如果缺失，请联系维护者获取知识库文件
 ```
 
-### Issue: "vivo API authentication failed"
+### 问题："vivo API authentication failed"
 
-**Solution**: Verify your credentials
+**解决方案**：验证您的凭证
 
 ```bash
-# Check your .env file
+# 检查您的 .env 文件
 cat .env | grep VIVO_
 
-# Ensure APP_ID and APP_KEY are correct
-# Test with vivo AI platform directly
+# 确保 APP_ID 和 APP_KEY 正确
+# 直接在 vivo AI 平台测试
 ```
 
-### Issue: "Port 8000 already in use"
+### 问题："Port 8000 already in use"
 
-**Solution**: Use different port
+**解决方案**：使用不同端口
 
 ```bash
-# Option 1: Use different port
+# 选项 1：使用不同端口
 uvicorn newserver:app --port 8001
 
-# Option 2: Kill existing process
+# 选项 2：杀死现有进程
 sudo lsof -ti:8000 | xargs kill -9
 ```
 
-### Issue: "Connection timeout"
+### 问题："Connection timeout"
 
-**Solution**: Check network and proxy settings
+**解决方案**：检查网络和代理设置
 
 ```bash
-# Test connectivity
+# 测试连接
 curl -I https://api-ai.vivo.com.cn
 
-# If behind proxy, configure:
+# 如果在代理后面，配置：
 export HTTP_PROXY=http://your-proxy:port
 export HTTPS_PROXY=http://your-proxy:port
 ```
 
-## Next Steps
+## 下一步
 
-After successful installation:
+安装成功后：
 
-1. **Read the API Documentation**: Check `/docs/api-reference.md` for detailed API usage
-2. **Explore Image Input**: See `/docs/how-to-image-input.md` for multimodal capabilities  
-3. **Configure Web Search**: Review `/docs/how-to-web-search.md` for enhanced search features
-4. **Production Deployment**: Follow `/docs/production-deployment.md` for production setup
+1. **阅读 API 文档**：查看 `/docs/api-reference.md` 了解详细 API 使用方法
+2. **探索图片输入**：查看 `/docs/how-to-image-input.md` 了解多模态功能  
+3. **配置网络搜索**：查看 `/docs/how-to-web-search.md` 了解增强搜索功能
+4. **生产环境部署**：按照 `/docs/production-deployment.md` 进行生产设置
 
-## Getting Help
+## 获取帮助
 
-### Check Service Status
+### 检查服务状态
 
 ```bash
-# Health check
+# 健康检查
 curl http://localhost:8000/v1/health
 
-# Server stats
+# 服务统计
 curl http://localhost:8000/v1/stats
 
-# Service info
+# 服务信息
 curl http://localhost:8000/
 ```
 
-### Enable Debug Mode
+### 启用调试模式
 
-For troubleshooting, enable debug mode:
+用于故障排除，启用调试模式：
 
 ```properties
-# In .env file
+# 在 .env 文件中
 DEBUG_MODE=true
 LOG_LEVEL=DEBUG
 ```
 
-Restart the service to see detailed logs.
+重启服务查看详细日志。
 
-### Community Support
+### 社区支持
 
-- **GitHub Issues**: Report bugs and feature requests
-- **Documentation**: Check `/docs/` folder for detailed guides
-- **API Reference**: Visit `http://localhost:8000/docs` for interactive API documentation
+- **GitHub Issues**：报告错误和功能请求
+- **文档**：查看 `/docs/` 文件夹中的详细指南
+- **API 参考**：访问 `http://localhost:8000/docs` 获取交互式 API 文档
 
-## Success Checklist
+## 成功检查清单
 
-✅ Python 3.8+ installed  
-✅ Repository cloned and dependencies installed  
-✅ Environment variables configured  
-✅ Knowledge base files present  
-✅ Service starts without errors  
-✅ Health check returns "healthy"  
-✅ Models endpoint returns available models  
-✅ Basic API test succeeds  
-✅ RAG system shows as available  
+✅ 已安装 Python 3.8+  
+✅ 已克隆仓库并安装依赖  
+✅ 已配置环境变量  
+✅ 知识库文件存在  
+✅ 服务启动无错误  
+✅ 健康检查返回"healthy"  
+✅ 模型端点返回可用模型  
+✅ 基本 API 测试成功  
+✅ RAG 系统显示为可用  
 
-If all items are checked, your ShopGuard backend is ready for use! 🎉
+如果所有项目都已检查，您的 ShopGuard 后端已准备就绪！ 🎉

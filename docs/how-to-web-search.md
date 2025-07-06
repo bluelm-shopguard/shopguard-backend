@@ -1,38 +1,38 @@
-# How to Use Web Search 🔍
+# 如何使用网络搜索 🔍
 
-This guide explains how to enable and use the web search functionality in the ShopGuard backend service.
+本指南说明如何在 ShopGuard 后端服务中启用和使用网络搜索功能。
 
-## Web Search Overview
+## 网络搜索概述
 
-The web search feature automatically retrieves real-time information from the internet to enhance fraud detection and provide up-to-date market data.
+网络搜索功能会自动从互联网检索实时信息，以增强欺诈检测并提供最新的市场数据。
 
-## Automatic Web Search Triggering
+## 自动网络搜索触发
 
-Web search is **automatically triggered** based on the content and context of your queries. The system intelligently determines when to search for additional information.
+网络搜索基于查询的内容和上下文**自动触发**。系统会智能地决定何时搜索额外信息。
 
-### Shopping Context Detection
+### 购物上下文检测
 
-The service automatically detects shopping-related queries and enables web search for:
+服务会自动检测购物相关查询，并为以下情况启用网络搜索：
 
-- Price comparisons and market verification
-- Platform credibility checking  
-- Product availability confirmation
-- Current market trends and reviews
+- 价格比较和市场验证
+- 平台信誉检查  
+- 产品可用性确认
+- 当前市场趋势和评论
 
-### Search Activation Scenarios
+### 搜索激活场景
 
-Web search is typically triggered for:
+网络搜索通常在以下情况被触发：
 
-1. **Price-related queries**: "这个价格合理吗？", "市场价格是多少？"
-2. **Platform verification**: "这个网站可靠吗？", "这个平台安全吗？"
-3. **Product authenticity**: "这个商品是正品吗？", "官方售价多少？"
-4. **Real-time information**: "最新的诈骗手段", "当前市场行情"
+1. **价格相关查询**: "这个价格合理吗？", "市场价格是多少？"
+2. **平台验证**: "这个网站可靠吗？", "这个平台安全吗？"
+3. **产品真实性**: "这个商品是正品吗？", "官方售价多少？"
+4. **实时信息**: "最新的诈骗手段", "当前市场行情"
 
-## Configuration Options
+## 配置选项
 
-### User Type Influence
+### 用户类型影响
 
-Set the `user_type` parameter to influence search behavior:
+设置 `user_type` 参数以影响搜索行为：
 
 ```json
 {
@@ -42,16 +42,16 @@ Set the `user_type` parameter to influence search behavior:
 }
 ```
 
-**Available User Types:**
+**可用用户类型：**
 
-- `学生` - Student (educational focus)
-- `老师` - Teacher (educational authority)
-- `开发者` - Developer (technical focus)
-- `普通用户` - Regular user (general consumer)
+- `学生` - 学生（教育重点）
+- `老师` - 教师（教育权威）
+- `开发者` - 开发者（技术重点）
+- `普通用户` - 普通用户（一般消费者）
 
-### RAG Integration
+### RAG 集成
 
-Enable RAG (Retrieval Augmented Generation) to combine web search with knowledge base:
+启用 RAG（检索增强生成）以将网络搜索与知识库相结合：
 
 ```json
 {
@@ -60,9 +60,9 @@ Enable RAG (Retrieval Augmented Generation) to combine web search with knowledge
 }
 ```
 
-## API Request Examples
+## API 请求示例
 
-### Basic Shopping Query with Web Search
+### 基本购物查询（网络搜索）
 
 ```bash
 curl -X POST "http://localhost:8000/v1/chat/completions" \
@@ -80,7 +80,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
   }'
 ```
 
-### Platform Verification Request
+### 平台验证请求
 
 ```bash
 curl -X POST "http://localhost:8000/v1/chat/completions" \
@@ -99,13 +99,13 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
   }'
 ```
 
-### Image + Web Search Combination
+### 图片 + 网络搜索组合
 
 ```bash
 curl -X POST "http://localhost:8000/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "vivo-BlueLM-V-2.0",
+    "model": "vivo-BlueLM-TB-Pro",
     "messages": [
       {
         "role": "user",
@@ -128,29 +128,29 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
   }'
 ```
 
-## Available Search Engines
+## 可用搜索引擎
 
-The service supports multiple search engines for comprehensive results:
+该服务支持多个搜索引擎以获得全面的结果：
 
-### Primary Search Engines
+### 主要搜索引擎
 
-1. **search_std** - Standard search (default)
-2. **search_pro** - Professional search with enhanced results
-3. **search_pro_sogou** - Sogou search engine
-4. **search_pro_quark** - Quark search engine  
-5. **search_pro_jina** - Jina search engine
-6. **search_pro_bing** - Bing search engine
+1. **search_std** - 标准搜索（默认）
+2. **search_pro** - 专业搜索，增强结果
+3. **search_pro_sogou** - 搜狗搜索引擎
+4. **search_pro_quark** - 夸克搜索引擎  
+5. **search_pro_jina** - Jina 搜索引擎
+6. **search_pro_bing** - 必应搜索引擎
 
-### Search Engine Selection
+### 搜索引擎选择
 
-The system automatically selects the most appropriate search engine based on:
+系统会根据以下因素自动选择最合适的搜索引擎：
 
-- Query type and complexity
-- Regional preferences
-- Search result quality
-- Response time requirements
+- 查询类型和复杂度
+- 区域偏好
+- 搜索结果质量
+- 响应时间要求
 
-## Python Client Example
+## Python 客户端示例
 
 ```python
 import requests
@@ -178,7 +178,7 @@ def search_enabled_query(question, user_type="普通用户"):
     
     return response.json()
 
-# Example usage
+# 使用示例
 result = search_enabled_query(
     "这个iPhone价格1000元是真的吗？请帮我查一下市场价格",
     "普通用户"
@@ -187,46 +187,46 @@ result = search_enabled_query(
 print(result['choices'][0]['message']['content'])
 ```
 
-## Search Result Processing
+## 搜索结果处理
 
-### Automatic Summarization
+### 自动摘要
 
-The service automatically:
+该服务会自动：
 
-- **Compresses** long search results to essential information
-- **Extracts** key facts and prices
-- **Summarizes** multiple sources into coherent responses
-- **Filters** irrelevant or duplicate information
+- **压缩**长搜索结果为关键信息
+- **提取**关键事实和价格
+- **摘要**多个来源成连贯的响应
+- **过滤**不相关或重复的信息
 
-### Content Size Options
+### 内容大小选项
 
-Search results are processed with different detail levels:
+搜索结果以不同的详细程度进行处理：
 
-- **Small**: Brief summaries only
-- **Medium**: Balanced detail (default)  
-- **Large**: Comprehensive information
+- **小**: 仅简要摘要
+- **中**: 平衡的详细信息（默认）  
+- **大**: 全面的信息
 
-## Environment Configuration
+## 环境配置
 
-Ensure these environment variables are set:
+确保设置这些环境变量：
 
 ```properties
-# Web Search Configuration
+# 网络搜索配置
 WEB_SEARCH_API_KEY=your_web_search_api_key
 WEB_SEARCH_URL=https://open.bigmodel.cn/api/paas/v4/web_search
 
-# Search Engine Settings
+# 搜索引擎设置
 SEARCH_DEFAULT_ENGINE=search_std
 SEARCH_TIMEOUT_SECONDS=10
 SEARCH_DEFAULT_COUNT=4
 SEARCH_CONTENT_SIZE=medium
 ```
 
-## Advanced Configuration
+## 高级配置
 
-### Search Parameters
+### 搜索参数
 
-You can influence search behavior through additional parameters:
+您可以通过额外参数影响搜索行为：
 
 ```json
 {
@@ -240,9 +240,9 @@ You can influence search behavior through additional parameters:
 }
 ```
 
-### Custom Search Queries
+### 自定义搜索查询
 
-For specific search needs, you can hint at search terms:
+对于特定的搜索需求，您可以暗示搜索词：
 
 ```json
 {
@@ -251,50 +251,50 @@ For specific search needs, you can hint at search terms:
 }
 ```
 
-## Common Use Cases
+## 常见使用场景
 
-### 1. Price Verification
+### 1. 价格验证
 
-Query market prices for products to detect unrealistic pricing:
+查询产品市场价格以检测不现实的定价：
 
 ```python
 query = "这个MacBook Pro只要5000元，是真的吗？"
 ```
 
-### 2. Platform Credibility
+### 2. 平台信誉
 
-Verify the legitimacy of shopping platforms:
+验证购物平台的合法性：
 
 ```python
-query = "超级购物网这个平台可靠吗？"
+query = "拼多多这个平台可靠吗？"
 ```
 
-### 3. Scam Detection
+### 3. 诈骗检测
 
-Search for known scam patterns and reports:
+搜索已知的诈骗模式和报告：
 
 ```python
 query = "有人让我扫码领取iPhone，这是诈骗吗？"
 ```
 
-### 4. Market Trend Analysis
+### 4. 市场趋势分析
 
-Get current market information and trends:
+获取当前市场信息和趋势：
 
 ```python
 query = "最近有什么新的网购诈骗手段？"
 ```
 
-## Best Practices
+## 最佳实践
 
-### Query Optimization
+### 查询优化
 
-- **Be specific**: Include product names, prices, or platform names
-- **Ask for comparisons**: Request market price comparisons
-- **Mention verification**: Ask for credibility or legitimacy checks
-- **Include context**: Provide background information
+- **具体化**: 包含产品名称、价格或平台名称
+- **要求比较**: 请求市场价格比较
+- **提及验证**: 询问信誉或合法性检查
+- **包含上下文**: 提供背景信息
 
-### Error Handling
+### 错误处理
 
 ```python
 def handle_search_query(query):
@@ -304,60 +304,60 @@ def handle_search_query(query):
         
         result = response.json()
         if 'error' in result:
-            return f"Search failed: {result['error']['message']}"
+            return f"搜索失败: {result['error']['message']}"
         
         return result['choices'][0]['message']['content']
         
     except requests.exceptions.Timeout:
-        return "Search timed out, please try again"
+        return "搜索超时，请稍后再试"
     except requests.exceptions.RequestException as e:
-        return f"Request failed: {e}"
+        return f"请求失败: {e}"
 ```
 
-## Troubleshooting
+## 故障排除
 
-### Common Issues
+### 常见问题
 
-1. **No search results**
-   - Check if web search API key is configured
-   - Verify internet connectivity
-   - Try different query phrasing
+1. **无搜索结果**
+   - 检查网络搜索 API 密钥是否已配置
+   - 验证互联网连接
+   - 尝试不同的查询措辞
 
-2. **Search timeout**
-   - Increase timeout settings
-   - Use more specific queries
-   - Check API service status
+2. **搜索超时**
+   - 增加超时设置
+   - 使用更具体的查询
+   - 检查 API 服务状态
 
-3. **Irrelevant results**
-   - Make queries more specific
-   - Include context and details
-   - Try different user types
+3. **结果不相关**
+   - 使查询更具体
+   - 包含上下文和细节
+   - 尝试不同的用户类型
 
-### Monitoring Search Usage
+### 监控搜索使用
 
-Check search functionality through health endpoint:
+通过健康端点检查搜索功能：
 
 ```bash
 curl http://localhost:8000/v1/health
 ```
 
-Look for `web_search_available` in the response.
+在响应中查找 `web_search_available`。
 
-## Rate Limits and Quotas
+## 速率限制和配额
 
-Be aware of:
+请注意：
 
-- **API quotas**: Web search API has usage limits
-- **Rate limiting**: Automatic throttling prevents overuse  
-- **Cost optimization**: Search is triggered only when necessary
+- **API 配额**: 网络搜索 API 有使用限制
+- **速率限制**: 自动节流防止过度使用  
+- **成本优化**: 仅在必要时触发搜索
 
-## Getting Help
+## 获取帮助
 
-If web search isn't working:
+如果网络搜索不工作：
 
-1. Verify API keys are correctly configured
-2. Check the service logs for search-related errors
-3. Test with simple, clear queries first
-4. Review your API quota usage
+1. 验证 API 密钥是否正确配置
+2. 检查服务日志中的搜索相关错误
+3. 先使用简单、清晰的查询进行测试
+4. 检查您的 API 配额使用情况
 
-The web search feature enhances fraud detection by providing real-time market intelligence and verification capabilities.
+网络搜索功能通过提供实时市场情报和验证能力来增强欺诈检测。

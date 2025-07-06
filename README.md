@@ -879,4 +879,4 @@ LOGGING_CONFIG = {
 
 **版本**: 3.0.0  
 **最后更新**: 2025年7月5日  
-**维护者**: bluelm-shopguard团队
+**维护者**: bluelm-shopguard 团队

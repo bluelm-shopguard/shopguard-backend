@@ -1,29 +1,29 @@
-# 配置指南 ⚙️
+# Configuration Guide ⚙️
 
-ShopGuard 后端服务的完整配置指南。
+Complete guide for configuring the ShopGuard backend service.
 
-## 环境变量
+## Environment Variables
 
-### 必需配置
+### Required Configuration
 
-#### vivo AI 平台凭证
+#### vivo AI Platform Credentials
 
 ```properties
-# 必需：vivo AI 平台认证
+# Required: vivo AI Platform authentication
 VIVO_APP_ID=your_app_id_here
 VIVO_APP_KEY=your_app_key_here
 ```
 
-**如何获取：**
+**How to obtain:**
 
-1. 在 [vivo AI 平台](https://developers.vivo.com/product/ai) 注册
-2. 创建新应用程序
-3. 从您的仪表板复制 APP_ID 和 APP_KEY
+1. Register at [vivo AI Platform](https://developers.vivo.com/product/ai)
+2. Create a new application
+3. Copy the APP_ID and APP_KEY from your dashboard
 
-#### API 端点
+#### API Endpoints
 
 ```properties
-# vivo AI API 端点（使用这些默认值）
+# vivo AI API endpoints (use these defaults)
 VIVOGPT_API_URI=/vivogpt/completions
 VIVOGPT_API_DOMAIN=api-ai.vivo.com.cn
 MULTIMODAL_URI=/vivogpt/completions
@@ -32,81 +32,81 @@ RAG_API_URI=/embedding-model-api/predict/batch
 RAG_API_DOMAIN=api-ai.vivo.com.cn
 ```
 
-### 可选配置
+### Optional Configuration
 
-#### 网络搜索服务
+#### Web Search Service
 
 ```properties
-# 可选：启用网络搜索功能
+# Optional: Enable web search functionality
 WEB_SEARCH_API_KEY=your_search_api_key
 WEB_SEARCH_URL=https://open.bigmodel.cn/api/paas/v4/web_search
 ```
 
-**如何获取：**
+**How to obtain:**
 
-1. 在 [智谱AI](https://open.bigmodel.cn/) 注册
-2. 为网络搜索服务创建 API 密钥
-3. 将 API 密钥复制到 WEB_SEARCH_API_KEY
+1. Register at [智谱AI](https://open.bigmodel.cn/)
+2. Create API key for web search service
+3. Copy the API key to WEB_SEARCH_API_KEY
 
-#### 服务器配置
+#### Server Configuration
 
 ```properties
-# 服务器绑定配置
+# Server binding configuration
 SERVER_HOST=0.0.0.0
 SERVER_PORT=8000
 
-# 应用程序设置
+# Application settings
 DEBUG_MODE=false
 LOG_LEVEL=INFO
 ```
 
-#### 性能设置
+#### Performance Settings
 
 ```properties
-# 并发请求限制
+# Concurrent request limits
 MAX_CONCURRENT_REQUESTS=100
 REQUEST_TIMEOUT_SECONDS=30
 
-# 缓存配置
+# Cache configuration
 RAG_CACHE_TTL_SECONDS=3600
 CONVERSATION_HISTORY_LIMIT=100
 
-# 内存管理
+# Memory management
 MAX_MEMORY_USAGE_MB=2048
 GARBAGE_COLLECTION_THRESHOLD=1000
 ```
 
-#### 安全设置
+#### Security Settings
 
 ```properties
-# CORS 配置
+# CORS configuration
 ALLOWED_ORIGINS=*
 CORS_ALLOW_CREDENTIALS=false
 
-# API 安全
+# API security
 API_KEY_REQUIRED=false
 DEFAULT_API_KEY=your_default_api_key
 
-# 速率限制
+# Rate limiting
 RATE_LIMIT_ENABLED=true
 RATE_LIMIT_REQUESTS_PER_MINUTE=60
 RATE_LIMIT_BURST_SIZE=10
 ```
 
-## 配置文件
+## Configuration Files
 
-### 环境模板
+### Environment Templates
 
-#### 开发环境 (.env.development)
+#### Development (.env.development)
 
 ```properties
-# 开发环境配置
+# Development Environment Configuration
 
-# vivo AI 平台（开发）
+# vivo AI Platform (Development)
 VIVO_APP_ID=dev_app_id
 VIVO_APP_KEY=dev_app_key
 
-# API 端点
+# API Endpoints
 VIVOGPT_API_URI=/vivogpt/completions
 VIVOGPT_API_DOMAIN=api-ai.vivo.com.cn
 MULTIMODAL_URI=/vivogpt/completions
@@ -114,39 +114,39 @@ MULTIMODAL_DOMAIN=api-ai.vivo.com.cn
 RAG_API_URI=/embedding-model-api/predict/batch
 RAG_API_DOMAIN=api-ai.vivo.com.cn
 
-# 网络搜索（开发）
+# Web Search (Development)
 WEB_SEARCH_API_KEY=dev_search_key
 WEB_SEARCH_URL=https://open.bigmodel.cn/api/paas/v4/web_search
 
-# 服务器配置
+# Server Configuration
 SERVER_HOST=127.0.0.1
 SERVER_PORT=8000
 DEBUG_MODE=true
 LOG_LEVEL=DEBUG
 
-# 性能（开发）
+# Performance (Development)
 MAX_CONCURRENT_REQUESTS=10
 REQUEST_TIMEOUT_SECONDS=60
 RAG_CACHE_TTL_SECONDS=1800
 CONVERSATION_HISTORY_LIMIT=200
 
-# 安全（开发）
+# Security (Development)
 ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 CORS_ALLOW_CREDENTIALS=true
 API_KEY_REQUIRED=false
 RATE_LIMIT_ENABLED=false
 ```
 
-#### 生产环境 (.env.production)
+#### Production (.env.production)
 
 ```properties
-# 生产环境配置
+# Production Environment Configuration
 
-# vivo AI 平台（生产）
+# vivo AI Platform (Production)
 VIVO_APP_ID=prod_app_id
 VIVO_APP_KEY=prod_app_key
 
-# API 端点
+# API Endpoints
 VIVOGPT_API_URI=/vivogpt/completions
 VIVOGPT_API_DOMAIN=api-ai.vivo.com.cn
 MULTIMODAL_URI=/vivogpt/completions
@@ -154,23 +154,23 @@ MULTIMODAL_DOMAIN=api-ai.vivo.com.cn
 RAG_API_URI=/embedding-model-api/predict/batch
 RAG_API_DOMAIN=api-ai.vivo.com.cn
 
-# 网络搜索（生产）
+# Web Search (Production)
 WEB_SEARCH_API_KEY=prod_search_key
 WEB_SEARCH_URL=https://open.bigmodel.cn/api/paas/v4/web_search
 
-# 服务器配置
+# Server Configuration
 SERVER_HOST=127.0.0.1
 SERVER_PORT=8000
 DEBUG_MODE=false
 LOG_LEVEL=INFO
 
-# 性能（生产）
+# Performance (Production)
 MAX_CONCURRENT_REQUESTS=200
 REQUEST_TIMEOUT_SECONDS=30
 RAG_CACHE_TTL_SECONDS=7200
 CONVERSATION_HISTORY_LIMIT=50
 
-# 安全（生产）
+# Security (Production)
 ALLOWED_ORIGINS=https://your-domain.com,https://www.your-domain.com
 CORS_ALLOW_CREDENTIALS=false
 API_KEY_REQUIRED=true
@@ -179,49 +179,49 @@ RATE_LIMIT_ENABLED=true
 RATE_LIMIT_REQUESTS_PER_MINUTE=100
 RATE_LIMIT_BURST_SIZE=20
 
-# 数据库（生产）
+# Database (Production)
 DATABASE_URL=postgresql://user:password@localhost/shopguard
 REDIS_URL=redis://localhost:6379/0
 ```
 
-### 应用程序配置
+### Application Configuration
 
-#### RAG 系统配置
+#### RAG System Configuration
 
 ```python
 # rag_config.py
 RAG_CONFIG = {
-    # 模型设置
+    # Model settings
     "embedding_model": "m3e-base",
     "vector_dimension": 768,
     "similarity_threshold": 0.0,
     
-    # 检索设置
+    # Retrieval settings
     "default_top_k": 2,
     "max_top_k": 10,
     "max_context_length": 2000,
     
-    # 缓存设置
+    # Cache settings
     "enable_cache": True,
     "cache_ttl_seconds": 3600,
     "max_cache_size": 10000,
     
-    # 知识库
+    # Knowledge base
     "knowledge_base_path": "knowledge_base_embeddings/all_knowledge_embeddings.json",
     "auto_reload": False,
     "reload_interval_seconds": 3600
 }
 ```
 
-#### 网络搜索配置
+#### Web Search Configuration
 
 ```python
 # search_config.py
 SEARCH_CONFIG = {
-    # 默认搜索引擎
+    # Default search engine
     "default_engine": "search_std",
     
-    # 可用引擎
+    # Available engines
     "available_engines": [
         "search_std",
         "search_pro", 
@@ -231,24 +231,24 @@ SEARCH_CONFIG = {
         "search_pro_bing"
     ],
     
-    # 搜索参数
+    # Search parameters
     "default_count": 4,
     "max_count": 10,
     "content_size": "medium",  # small, medium, large
     "timeout_seconds": 10,
     
-    # 结果处理
+    # Result processing
     "enable_summarization": True,
     "max_summary_length": 500,
     "remove_duplicates": True,
     
-    # 速率限制
+    # Rate limiting
     "requests_per_minute": 60,
     "burst_size": 10
 }
 ```
 
-#### 模型配置
+#### Model Configuration
 
 ```python
 # model_config.py
@@ -274,11 +274,11 @@ MODEL_CONFIG = {
 }
 ```
 
-## 配置加载
+## Configuration Loading
 
-### 基于环境的配置
+### Environment-based Configuration
 
-应用程序根据环境自动加载配置：
+The application automatically loads configuration based on the environment:
 
 ```python
 # config.py
@@ -292,20 +292,20 @@ class Config:
         self.validate_config()
     
     def load_environment(self):
-        # 确定环境
+        # Determine environment
         env = os.getenv('ENVIRONMENT', 'development')
         
-        # 加载基础配置
+        # Load base configuration
         base_env = Path('.env')
         if base_env.exists():
             load_dotenv(base_env)
         
-        # 加载特定环境的配置
+        # Load environment-specific configuration
         env_file = Path(f'.env.{env}')
         if env_file.exists():
             load_dotenv(env_file, override=True)
         
-        # 加载本地覆盖
+        # Load local overrides
         local_env = Path('.env.local')
         if local_env.exists():
             load_dotenv(local_env, override=True)
@@ -318,13 +318,13 @@ class Config:
         
         missing_vars = [var for var in required_vars if not os.getenv(var)]
         if missing_vars:
-            raise ValueError(f"缺少必需的环境变量: {missing_vars}")
+            raise ValueError(f"Missing required environment variables: {missing_vars}")
 
-# 使用方法
+# Usage
 config = Config()
 ```
 
-### 配置验证
+### Configuration Validation
 
 ```python
 # config_validator.py
@@ -333,56 +333,56 @@ import json
 from pathlib import Path
 
 def validate_vivo_credentials():
-    """验证 vivo AI 平台凭证"""
+    """Validate vivo AI platform credentials"""
     app_id = os.getenv('VIVO_APP_ID')
     app_key = os.getenv('VIVO_APP_KEY')
     
     if not app_id or not app_key:
-        return False, "缺少 vivo AI 凭证"
+        return False, "Missing vivo AI credentials"
     
     if len(app_id) < 10 or len(app_key) < 20:
-        return False, "凭证格式无效"
+        return False, "Invalid credential format"
     
-    return True, "凭证有效"
+    return True, "Credentials valid"
 
 def validate_knowledge_base():
-    """验证知识库文件"""
+    """Validate knowledge base files"""
     kb_path = Path("knowledge_base_embeddings/all_knowledge_embeddings.json")
     
     if not kb_path.exists():
-        return False, f"知识库文件未找到: {kb_path}"
+        return False, f"Knowledge base file not found: {kb_path}"
     
     try:
         with open(kb_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
         if not isinstance(data, list) or len(data) == 0:
-            return False, "知识库为空或格式无效"
+            return False, "Knowledge base is empty or invalid format"
         
-        return True, f"知识库已加载: {len(data)} 条记录"
+        return True, f"Knowledge base loaded: {len(data)} entries"
     
     except Exception as e:
-        return False, f"加载知识库失败: {e}"
+        return False, f"Failed to load knowledge base: {e}"
 
 def validate_web_search():
-    """验证网络搜索配置"""
+    """Validate web search configuration"""
     api_key = os.getenv('WEB_SEARCH_API_KEY')
     api_url = os.getenv('WEB_SEARCH_URL')
     
     if not api_key:
-        return False, "网络搜索 API 密钥未配置"
+        return False, "Web search API key not configured"
     
     if not api_url:
-        return False, "网络搜索 URL 未配置"
+        return False, "Web search URL not configured"
     
-    return True, "网络搜索配置有效"
+    return True, "Web search configuration valid"
 
 def run_all_validations():
-    """运行所有配置验证"""
+    """Run all configuration validations"""
     validations = [
-        ("vivo 凭证", validate_vivo_credentials),
-        ("知识库", validate_knowledge_base),
-        ("网络搜索", validate_web_search)
+        ("vivo Credentials", validate_vivo_credentials),
+        ("Knowledge Base", validate_knowledge_base),
+        ("Web Search", validate_web_search)
     ]
     
     results = {}
@@ -402,9 +402,9 @@ if __name__ == "__main__":
         print(f"{status} {name}: {result['message']}")
 ```
 
-## Docker 配置
+## Docker Configuration
 
-### Docker 环境变量
+### Docker Environment Variables
 
 ```yaml
 # docker-compose.yml
@@ -414,11 +414,11 @@ services:
   shopguard-backend:
     build: .
     environment:
-      # vivo AI 平台
+      # vivo AI Platform
       - VIVO_APP_ID=${VIVO_APP_ID}
       - VIVO_APP_KEY=${VIVO_APP_KEY}
       
-      # API 配置
+      # API Configuration
       - VIVOGPT_API_URI=/vivogpt/completions
       - VIVOGPT_API_DOMAIN=api-ai.vivo.com.cn
       - MULTIMODAL_URI=/vivogpt/completions
@@ -426,17 +426,17 @@ services:
       - RAG_API_URI=/embedding-model-api/predict/batch
       - RAG_API_DOMAIN=api-ai.vivo.com.cn
       
-      # 网络搜索
+      # Web Search
       - WEB_SEARCH_API_KEY=${WEB_SEARCH_API_KEY}
       - WEB_SEARCH_URL=https://open.bigmodel.cn/api/paas/v4/web_search
       
-      # 服务器配置
+      # Server Configuration
       - SERVER_HOST=0.0.0.0
       - SERVER_PORT=8000
       - DEBUG_MODE=false
       - LOG_LEVEL=INFO
       
-      # 性能
+      # Performance
       - MAX_CONCURRENT_REQUESTS=100
       - REQUEST_TIMEOUT_SECONDS=30
       - RAG_CACHE_TTL_SECONDS=3600
@@ -449,9 +449,9 @@ services:
     restart: unless-stopped
 ```
 
-### Docker 密钥
+### Docker Secrets
 
-对于生产环境的 Docker 部署，使用 Docker 密钥：
+For production Docker deployments, use Docker secrets:
 
 ```yaml
 # docker-compose.prod.yml
@@ -478,11 +478,11 @@ secrets:
     external: true
 ```
 
-## 配置管理
+## Configuration Management
 
-### 配置热重载
+### Configuration Hot Reload
 
-启用开发环境的配置热重载：
+Enable configuration hot reload for development:
 
 ```python
 # hot_reload.py
@@ -506,11 +506,11 @@ class ConfigReloadHandler(FileSystemEventHandler):
             if (event.src_path not in self.last_modified or 
                 current_time - self.last_modified[event.src_path] > 1):
                 self.last_modified[event.src_path] = current_time
-                print(f"配置文件已更改: {event.src_path}")
+                print(f"Configuration file changed: {event.src_path}")
                 self.callback()
 
 def setup_config_watcher(reload_callback):
-    """设置配置文件监听器"""
+    """Setup configuration file watcher"""
     if os.getenv('DEBUG_MODE', 'false').lower() == 'true':
         event_handler = ConfigReloadHandler(reload_callback)
         observer = Observer()
@@ -520,9 +520,9 @@ def setup_config_watcher(reload_callback):
     return None
 ```
 
-### 配置 CLI
+### Configuration CLI
 
-创建配置管理命令行工具：
+Create a configuration management CLI:
 
 ```python
 # config_cli.py
@@ -533,12 +533,12 @@ from pathlib import Path
 
 @click.group()
 def cli():
-    """配置管理 CLI"""
+    """Configuration management CLI"""
     pass
 
 @cli.command()
 def validate():
-    """验证当前配置"""
+    """Validate current configuration"""
     from config_validator import run_all_validations
     
     results = run_all_validations()
@@ -547,22 +547,22 @@ def validate():
         click.echo(f"{status} {name}: {result['message']}")
 
 @cli.command()
-@click.option('--env', default='development', help='环境名称')
+@click.option('--env', default='development', help='Environment name')
 def create_env(env):
-    """创建环境配置模板"""
+    """Create environment configuration template"""
     env_file = Path(f'.env.{env}')
     
     if env_file.exists():
-        click.echo(f"环境文件已存在: {env_file}")
+        click.echo(f"Environment file already exists: {env_file}")
         return
     
-    template = """# {env} 环境配置
+    template = """# {env} Environment Configuration
 
-# vivo AI 平台
+# vivo AI Platform
 VIVO_APP_ID=your_app_id_here
 VIVO_APP_KEY=your_app_key_here
 
-# API 端点
+# API Endpoints
 VIVOGPT_API_URI=/vivogpt/completions
 VIVOGPT_API_DOMAIN=api-ai.vivo.com.cn
 MULTIMODAL_URI=/vivogpt/completions
@@ -570,11 +570,11 @@ MULTIMODAL_DOMAIN=api-ai.vivo.com.cn
 RAG_API_URI=/embedding-model-api/predict/batch
 RAG_API_DOMAIN=api-ai.vivo.com.cn
 
-# 网络搜索
+# Web Search
 WEB_SEARCH_API_KEY=your_search_api_key
 WEB_SEARCH_URL=https://open.bigmodel.cn/api/paas/v4/web_search
 
-# 服务器配置
+# Server Configuration
 SERVER_HOST=127.0.0.1
 SERVER_PORT=8000
 DEBUG_MODE=false
@@ -582,11 +582,11 @@ LOG_LEVEL=INFO
 """.format(env=env.upper())
     
     env_file.write_text(template)
-    click.echo(f"已创建环境文件: {env_file}")
+    click.echo(f"Created environment file: {env_file}")
 
 @cli.command()
 def show_config():
-    """显示当前配置"""
+    """Show current configuration"""
     config_vars = [
         'VIVO_APP_ID',
         'VIVO_APP_KEY',
@@ -597,12 +597,12 @@ def show_config():
         'LOG_LEVEL'
     ]
     
-    click.echo("当前配置:")
+    click.echo("Current Configuration:")
     click.echo("=" * 50)
     
     for var in config_vars:
-        value = os.getenv(var, '未设置')
-        if 'KEY' in var and value != '未设置':
+        value = os.getenv(var, 'Not set')
+        if 'KEY' in var and value != 'Not set':
             value = value[:8] + '...' if len(value) > 8 else value
         click.echo(f"{var}: {value}")
 
@@ -610,92 +610,92 @@ if __name__ == '__main__':
     cli()
 ```
 
-使用方法：
+Usage:
 
 ```bash
-# 验证配置
+# Validate configuration
 python config_cli.py validate
 
-# 创建新环境
+# Create new environment
 python config_cli.py create-env --env staging
 
-# 显示当前配置
+# Show current configuration
 python config_cli.py show-config
 ```
 
-## 最佳实践
+## Best Practices
 
-### 安全最佳实践
+### Security Best Practices
 
-1. **永远不要将机密信息提交到版本控制**
+1. **Never commit secrets to version control**
 
    ```bash
-   # 添加到 .gitignore
+   # Add to .gitignore
    .env*
    !.env.example
    secrets/
    ```
 
-2. **使用特定环境的配置**
+2. **Use environment-specific configurations**
 
    ```bash
-   # 不同环境使用不同文件
+   # Different files for different environments
    .env.development
    .env.staging
    .env.production
    ```
 
-3. **定期轮换凭证**
+3. **Rotate credentials regularly**
 
    ```bash
-   # 每月更新凭证
+   # Update credentials monthly
    VIVO_APP_KEY=new_key_here
    WEB_SEARCH_API_KEY=new_search_key
    ```
 
-### 性能最佳实践
+### Performance Best Practices
 
-1. **针对您的工作负载进行调优**
+1. **Tune for your workload**
 
    ```properties
-   # 高流量网站
+   # High-traffic sites
    MAX_CONCURRENT_REQUESTS=500
    RAG_CACHE_TTL_SECONDS=14400
    
-   # 低流量网站
+   # Low-traffic sites
    MAX_CONCURRENT_REQUESTS=50
    RAG_CACHE_TTL_SECONDS=1800
    ```
 
-2. **监控资源使用情况**
+2. **Monitor resource usage**
 
    ```properties
-   # 启用监控
+   # Enable monitoring
    ENABLE_METRICS=true
    METRICS_PORT=9090
    ```
 
-### 维护最佳实践
+### Maintenance Best Practices
 
-1. **定期配置审核**
+1. **Regular configuration audits**
 
    ```bash
-   # 每月配置审查
+   # Monthly configuration review
    python config_cli.py validate
    ```
 
-2. **备份配置**
+2. **Backup configurations**
 
    ```bash
-   # 更改前备份
+   # Backup before changes
    cp .env.production .env.production.backup.$(date +%Y%m%d)
    ```
 
-3. **记录配置更改**
+3. **Document configuration changes**
 
    ```bash
-   # 保持更改日志
-   echo "$(date): 更新 RAG 缓存 TTL 为 7200 秒" >> config_changes.log
+   # Keep a changelog
+   echo "$(date): Updated RAG cache TTL to 7200s" >> config_changes.log
    ```
 
-此配置指南为 ShopGuard 后端服务提供了所有配置选项和最佳实践的全面覆盖。
+This configuration guide provides comprehensive coverage of all configuration options and best practices for the ShopGuard backend service.

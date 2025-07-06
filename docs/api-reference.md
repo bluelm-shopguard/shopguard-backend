@@ -1,25 +1,25 @@
-# API Reference 📚
+# API 参考 📚
 
-Complete API documentation for the ShopGuard backend service.
+ShopGuard 后端服务的完整 API 文档。
 
-## Base Information
+## 基本信息
 
-- **Base URL**: `http://localhost:8000`
-- **API Version**: v1
-- **Content Type**: `application/json`
-- **Authentication**: Bearer Token (optional)
+- **基础 URL**: `http://localhost:8000`
+- **API 版本**: v1
+- **内容类型**: `application/json`
+- **认证**: Bearer Token（可选）
 
-## Core Endpoints
+## 核心端点
 
-### 1. Health Check
+### 1. 健康检查
 
-Check service status and system health.
+检查服务状态和系统健康情况。
 
 ```http
 GET /v1/health
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
@@ -34,20 +34,20 @@ GET /v1/health
 }
 ```
 
-**Status Codes:**
+**状态码：**
 
-- `200` - Service healthy
-- `503` - Service unhealthy
+- `200` - 服务健康
+- `503` - 服务不健康
 
-### 2. Service Statistics
+### 2. 服务统计
 
-Get current service statistics and metrics.
+获取当前服务统计信息和指标。
 
 ```http
 GET /v1/stats
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
@@ -58,15 +58,15 @@ GET /v1/stats
 }
 ```
 
-### 3. Available Models
+### 3. 可用模型
 
-List all available AI models.
+列出所有可用的 AI 模型。
 
 ```http
 GET /v1/models
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
@@ -88,68 +88,68 @@ GET /v1/models
 }
 ```
 
-### 4. Chat Completions (Main Endpoint)
+### 4. 聊天补全（主要端点）
 
-Create chat completions with support for text, images, RAG, and web search.
+创建支持文本、图像、RAG 和网络搜索的聊天补全。
 
 ```http
 POST /v1/chat/completions
 ```
 
-## Chat Completions API
+## 聊天补全 API
 
-### Request Parameters
+### 请求参数
 
-#### Core Parameters
+#### 核心参数
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `model` | string | ✅ | - | Model to use for completion |
-| `messages` | array | ✅ | - | List of conversation messages |
-| `temperature` | float | ❌ | 0.7 | Randomness control (0.0-2.0) |
-| `max_tokens` | integer | ❌ | 1024 | Maximum tokens to generate |
-| `top_p` | float | ❌ | 1.0 | Nucleus sampling parameter |
-| `stream` | boolean | ❌ | false | Enable streaming response |
-| `user` | string | ❌ | - | User identifier for tracking |
+| 参数 | 类型 | 必需 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `model` | string | ✅ | - | 用于补全的模型 |
+| `messages` | array | ✅ | - | 对话消息列表 |
+| `temperature` | float | ❌ | 0.7 | 随机性控制 (0.0-2.0) |
+| `max_tokens` | integer | ❌ | 1024 | 最大生成令牌数 |
+| `top_p` | float | ❌ | 1.0 | 核采样参数 |
+| `stream` | boolean | ❌ | false | 启用流式响应 |
+| `user` | string | ❌ | - | 用户标识符 |
 
-#### ShopGuard-Specific Parameters
+#### ShopGuard 特有参数
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `enable_rag` | boolean | ❌ | true | Enable RAG knowledge retrieval |
-| `rag_top_k` | integer | ❌ | 2 | Number of knowledge items to retrieve |
-| `user_type` | string | ❌ | "普通用户" | User type for personalized responses |
-| `user_id` | string | ❌ | - | User ID for session management |
-| `extra` | object | ❌ | {} | Additional model parameters |
+| 参数 | 类型 | 必需 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `enable_rag` | boolean | ❌ | true | 启用 RAG 知识检索 |
+| `rag_top_k` | integer | ❌ | 2 | 检索的知识项数量 |
+| `user_type` | string | ❌ | "普通用户" | 用户类型，用于个性化响应 |
+| `user_id` | string | ❌ | - | 用于会话管理的用户 ID |
+| `extra` | object | ❌ | {} | 额外的模型参数 |
 
-#### Advanced Parameters
+#### 高级参数
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `presence_penalty` | float | ❌ | 0.0 | Presence penalty (-2.0 to 2.0) |
-| `frequency_penalty` | float | ❌ | 0.0 | Frequency penalty (-2.0 to 2.0) |
-| `stop` | array | ❌ | null | Stop sequences |
-| `n` | integer | ❌ | 1 | Number of completions to generate |
+| 参数 | 类型 | 必需 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `presence_penalty` | float | ❌ | 0.0 | 存在惩罚 (-2.0 到 2.0) |
+| `frequency_penalty` | float | ❌ | 0.0 | 频率惩罚 (-2.0 到 2.0) |
+| `stop` | array | ❌ | null | 停止序列 |
+| `n` | integer | ❌ | 1 | 要生成的补全数量 |
 
-### Available Models
+### 可用模型
 
 #### vivo-BlueLM-TB-Pro
 
-- **Type**: Text-only model
-- **Capabilities**: Text generation, function calling, RAG enhancement
-- **Best for**: Pure text conversations, shopping fraud analysis
-- **Max tokens**: 4096
+- **类型**: 纯文本模型
+- **功能**: 文本生成、函数调用、RAG 增强
+- **最适合**: 纯文本对话、购物欺诈分析
+- **最大令牌数**: 4096
 
 #### vivo-BlueLM-V-2.0  
 
-- **Type**: Multimodal model (text + vision)
-- **Capabilities**: Image understanding, OCR, multimodal analysis
-- **Best for**: Image analysis, screenshot examination, visual fraud detection
-- **Max tokens**: 4096
+- **类型**: 多模态模型（文本 + 视觉）
+- **功能**: 图像理解、OCR、多模态分析
+- **最适合**: 图像分析、屏幕截图检查、视觉欺诈检测
+- **最大令牌数**: 4096
 
-### Message Formats
+### 消息格式
 
-#### 1. Simple Text Message
+#### 1. 简单文本消息
 
 ```json
 {
@@ -158,7 +158,7 @@ POST /v1/chat/completions
 }
 ```
 
-#### 2. OpenAI Vision Format
+#### 2. OpenAI 视觉格式
 
 ```json
 {
@@ -178,7 +178,7 @@ POST /v1/chat/completions
 }
 ```
 
-#### 3. Base64 Image Format
+#### 3. Base64 图像格式
 
 ```json
 {
@@ -187,7 +187,7 @@ POST /v1/chat/completions
 }
 ```
 
-#### 4. Mixed Content Format
+#### 4. 混合内容格式
 
 ```json
 {
@@ -197,18 +197,20 @@ POST /v1/chat/completions
 }
 ```
 
-### User Types
+### 用户类型
 
-Available user types for personalized responses:
+可用于个性化响应的用户类型：
 
-- `学生` - Student (educational focus)
-- `老师` - Teacher (educational authority)  
-- `开发者` - Developer (technical focus)
-- `普通用户` - Regular user (general consumer)
+- `学生` - 学生（教育重点）
+- `老师` - 教师（教育权威）  
+- `开发者` - 开发者（技术重点）
+- `普通用户` - 普通用户（一般消费者）
 
-### Request Examples
+### 请求示例
 
-#### Basic Text Query
+#### 基本文本查询
+
+如果您使用的是Linux:
 
 ```bash
 curl -X POST "http://localhost:8000/v1/chat/completions" \
@@ -218,15 +220,21 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
     "messages": [
       {
         "role": "user",
-        "content": "有人说iPhone只要1000元，这是诈骗吗？"
+        "content": "有人要我转账1000元买iPhone，说是特价，这靠谱吗？"
       }
-    ],
-    "enable_rag": true,
-    "user_type": "普通用户"
+    ]
   }'
 ```
 
-#### Image Analysis Query
+如果您使用的是Windows Powershell:
+
+```bash
+Invoke-RestMethod -Uri "http://localhost:8000/v1/chat/completions" -Method POST -ContentType "application/json; charset=utf-8" -Body '{"model": "vivo-BlueLM-TB-Pro", "messages": [{"role": "user", "content": "有人要我转账1000元买iPhone，说是特价，这靠谱吗？"}]}'
+```
+
+#### 图像分析查询
+
+如果您使用的是Linux:
 
 ```bash
 curl -X POST "http://localhost:8000/v1/chat/completions" \
@@ -256,7 +264,15 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
   }'
 ```
 
-#### Streaming Request
+如果您使用的是Windows Powershell:
+
+```bash
+Invoke-RestMethod -Uri "http://localhost:8000/v1/chat/completions" -Method POST -ContentType "application/json; charset=utf-8" -Body '{"model": "vivo-BlueLM-V-2.0", "messages": [{"role": "user", "content": [{"type": "text", "text": "这个购物页面安全吗？"}, {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,YOUR_BASE64_IMAGE"}}]}], "enable_rag": true, "rag_top_k": 3, "user_type": "普通用户"}'
+```
+
+#### 流式请求
+
+如果您使用的是Linux:
 
 ```bash
 curl -X POST "http://localhost:8000/v1/chat/completions" \
@@ -274,9 +290,28 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
   }'
 ```
 
-### Response Formats
+如果您使用的是Windows Powershell:
 
-#### Standard Response
+```bash
+Invoke-WebRequest -Uri "http://localhost:8000/v1/chat/completions" `
+  -Method POST `
+  -ContentType "application/json; charset=utf-8" `
+  -Body '{
+    "model": "vivo-BlueLM-TB-Pro",
+    "messages": [
+      {
+        "role": "user",
+        "content": "网购时如何避免诈骗？"
+      }
+    ],
+    "stream": true,
+    "enable_rag": true
+  }'
+```
+
+### 响应格式
+
+#### 标准响应
 
 ```json
 {
@@ -303,11 +338,11 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
 }
 ```
 
-#### Streaming Response
+#### 流式响应
 
-Server-Sent Events format:
+服务器发送事件格式：
 
-```
+```text
 data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1703025600,"model":"vivo-BlueLM-TB-Pro","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
 
 data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1703025600,"model":"vivo-BlueLM-TB-Pro","choices":[{"index":0,"delta":{"content":"根据"},"finish_reason":null}]}
@@ -317,14 +352,14 @@ data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1703025
 data: [DONE]
 ```
 
-## Error Handling
+## 错误处理
 
-### Error Response Format
+### 错误响应格式
 
 ```json
 {
   "error": {
-    "message": "Error description",
+    "message": "错误描述",
     "type": "invalid_request_error",
     "param": "model",
     "code": "model_not_found"
@@ -332,26 +367,26 @@ data: [DONE]
 }
 ```
 
-### Common Error Codes
+### 常见错误码
 
-| HTTP Status | Error Type | Description |
-|-------------|------------|-------------|
-| 400 | `invalid_request_error` | Invalid request parameters |
-| 401 | `authentication_error` | Invalid API key |
-| 403 | `permission_error` | Insufficient permissions |
-| 404 | `not_found_error` | Resource not found |
-| 429 | `rate_limit_error` | Rate limit exceeded |
-| 500 | `internal_server_error` | Server error |
-| 502 | `service_unavailable` | Upstream service unavailable |
+| HTTP 状态 | 错误类型 | 说明 |
+|----------|----------|------|
+| 400 | `invalid_request_error` | 无效的请求参数 |
+| 401 | `authentication_error` | 无效的 API 密钥 |
+| 403 | `permission_error` | 权限不足 |
+| 404 | `not_found_error` | 资源未找到 |
+| 429 | `rate_limit_error` | 超过速率限制 |
+| 500 | `internal_server_error` | 服务器错误 |
+| 502 | `service_unavailable` | 上游服务不可用 |
 
-### Example Error Responses
+### 错误响应示例
 
-#### Invalid Model Error
+#### 无效模型错误
 
 ```json
 {
   "error": {
-    "message": "The model 'invalid-model' does not exist",
+    "message": "模型 'invalid-model' 不存在",
     "type": "invalid_request_error", 
     "param": "model",
     "code": "model_not_found"
@@ -359,12 +394,12 @@ data: [DONE]
 }
 ```
 
-#### Rate Limit Error
+#### 速率限制错误
 
 ```json
 {
   "error": {
-    "message": "Rate limit exceeded. Please try again later.",
+    "message": "超过速率限制。请稍后再试。",
     "type": "rate_limit_error",
     "param": null,
     "code": "rate_limit_exceeded"
@@ -372,9 +407,9 @@ data: [DONE]
 }
 ```
 
-## Python SDK Example
+## Python SDK 示例
 
-### Basic Usage
+### 基本用法
 
 ```python
 import requests
@@ -386,7 +421,7 @@ class ShopGuardAPI:
         self.headers = {"Content-Type": "application/json"}
     
     def chat_completion(self, messages, model="vivo-BlueLM-TB-Pro", **kwargs):
-        """Create a chat completion"""
+        """创建聊天补全"""
         payload = {
             "model": model,
             "messages": messages,
@@ -403,7 +438,7 @@ class ShopGuardAPI:
         return response.json()
     
     def analyze_text(self, text, user_type="普通用户"):
-        """Analyze text for fraud detection"""
+        """分析文本以检测欺诈"""
         messages = [{"role": "user", "content": text}]
         
         return self.chat_completion(
@@ -413,7 +448,7 @@ class ShopGuardAPI:
         )
     
     def analyze_image(self, image_base64, question, user_type="普通用户"):
-        """Analyze image with question"""
+        """分析图像和问题"""
         messages = [{
             "role": "user",
             "content": [
@@ -433,24 +468,24 @@ class ShopGuardAPI:
         )
     
     def health_check(self):
-        """Check service health"""
+        """检查服务健康"""
         response = requests.get(f"{self.base_url}/v1/health")
         response.raise_for_status()
         return response.json()
 
-# Usage Example
+# 使用示例
 api = ShopGuardAPI()
 
-# Text analysis
+# 文本分析
 result = api.analyze_text("有人让我转账买iPhone，靠谱吗？")
 print(result['choices'][0]['message']['content'])
 
-# Health check
+# 健康检查
 health = api.health_check()
-print(f"Service status: {health['status']}")
+print(f"服务状态: {health['status']}")
 ```
 
-### Streaming Example
+### 流式示例
 
 ```python
 import requests
@@ -475,7 +510,7 @@ def stream_chat(messages, model="vivo-BlueLM-TB-Pro"):
         if line:
             line = line.decode('utf-8')
             if line.startswith('data: '):
-                data = line[6:]  # Remove 'data: ' prefix
+                data = line[6:]  # 移除 'data: ' 前缀
                 if data == '[DONE]':
                     break
                 try:
@@ -486,35 +521,35 @@ def stream_chat(messages, model="vivo-BlueLM-TB-Pro"):
                 except json.JSONDecodeError:
                     continue
 
-# Usage
+# 使用方法
 messages = [{"role": "user", "content": "如何识别网购诈骗？"}]
 stream_chat(messages)
 ```
 
-## Rate Limits
+## 速率限制
 
-### Default Limits
+### 默认限制
 
-- **Requests per minute**: 60
-- **Concurrent requests**: 10
-- **Tokens per minute**: 100,000
+- **每分钟请求数**: 60
+- **并发请求数**: 10
+- **每分钟令牌数**: 100,000
 
-### Headers
+### 响应头
 
-Rate limit information is included in response headers:
+响应头中包含速率限制信息：
 
-```
+```text
 X-RateLimit-Limit: 60
 X-RateLimit-Remaining: 59
 X-RateLimit-Reset: 1703025660
 ```
 
-## WebSocket Support (Future)
+## WebSocket 支持（未来功能）
 
-WebSocket support for real-time communication is planned for future releases:
+WebSocket 实时通信支持计划在未来版本中推出：
 
 ```javascript
-// Future WebSocket API (coming soon)
+// 未来的 WebSocket API（即将推出）
 const ws = new WebSocket('ws://localhost:8000/v1/ws');
 ws.send(JSON.stringify({
     type: 'chat',
@@ -523,30 +558,31 @@ ws.send(JSON.stringify({
 }));
 ```
 
-## Best Practices
+## 最佳实践
 
-### Request Optimization
+### 请求优化
 
-1. **Batch related queries** in conversation context
-2. **Use appropriate models** (text vs multimodal)
-3. **Enable RAG** for fraud detection queries
-4. **Set reasonable timeouts** for long requests
-5. **Handle errors gracefully** with retry logic
+1. **批量处理相关查询**在对话上下文中
+2. **使用适当的模型**（文本 vs 多模态）
+3. **合适的查询改写策略**用于增强回复的准确性
+4. **启用 RAG**用于欺诈检测查询
+5. **设置合理的超时**用于长请求
+6. **优雅处理错误**带重试逻辑
 
-### Performance Tips
+### 性能提示
 
-1. **Reuse sessions** for related conversations
-2. **Cache frequent queries** when appropriate
-3. **Use streaming** for long responses
-4. **Compress images** before sending
-5. **Monitor usage** to stay within limits
+1. **重用会话**用于相关对话
+2. **缓存常见查询**
+3. **使用流式**用于长响应
+4. **压缩图像**在发送前
+5. **监控使用情况**保持在限制内
 
-### Security Considerations
+### 安全考虑
 
-1. **Validate input** before sending to API
-2. **Sanitize responses** before displaying to users
-3. **Use HTTPS** in production
-4. **Rotate API keys** regularly
-5. **Log security events** for monitoring
+1. **验证输入**在发送到 API 前
+2. **清理响应**在显示给用户前
+3. **在生产环境使用 HTTPS**
+4. **定期轮换 API 密钥**
+5. **记录安全事件**用于监控
 
-This API reference provides complete documentation for integrating with the ShopGuard backend service. For additional examples and advanced usage, see the other documentation files in the `/docs` folder.
+此 API 参考为与 ShopGuard 后端服务集成提供了完整的文档。有关其他示例和高级用法，请参阅 `/docs_CN` 文件夹中的其他文档文件。
