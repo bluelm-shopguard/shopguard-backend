@@ -1,6 +1,6 @@
 # vivo BlueLM OpenAI-Compatible API Server 🚀
 
-一个功能完整的基于 vivo BlueLM 大模型的 OpenAI 兼容 API 服务器，专为购物反诈场景设计，集成多模态处理、RAG 检索增强、智能查询改写、Web 搜索、流式输出、会话管理等企业级功能。
+一个功能完整的基于 vivo BlueLM 大模型的 OpenAI 兼容 API 服务器，专为购物反诈场景设计，集成多模态处理、RAG 检索增强、智能查询改写、自动判断调用Web 搜索、流式输出、会话管理等企业级功能。
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.8+-green.svg)
@@ -149,7 +149,7 @@ python-dotenv>=1.0.0
 
 ### API 依赖
 - **vivo AI 平台账户**：需要有效的 APP_ID 和 APP_KEY
-- **Web 搜索服务**：智谱清言 Web Search API（可选）
+- **Web 搜索服务**：智谱清言 Web Search API
 
 ## 🛠️ 快速开始
 
@@ -193,7 +193,7 @@ RAG_API_URI=/embedding-model-api/predict/batch
 RAG_API_DOMAIN=api-ai.vivo.com.cn
 
 # Web 搜索配置（可选）
-WEB_SEARCH_API_KEY=your_web_search_key
+WEB_SEARCH_API_KEY=6d02b557c6ad44ab8ad89352b8d574a6.mMjCpdDH5W26Lj63
 WEB_SEARCH_URL=https://open.bigmodel.cn/api/paas/v4/web_search
 ```
 
@@ -568,9 +568,9 @@ RAG_API_URI=/embedding-model-api/predict/batch
 RAG_API_DOMAIN=api-ai.vivo.com.cn
 
 # ===========================================
-#            Web 搜索服务配置（可选）
+#            Web 搜索服务配置
 # ===========================================
-WEB_SEARCH_API_KEY=your_search_api_key
+WEB_SEARCH_API_KEY=6d02b557c6ad44ab8ad89352b8d574a6.mMjCpdDH5W26Lj63
 WEB_SEARCH_URL=https://open.bigmodel.cn/api/paas/v4/web_search
 
 # ===========================================
