@@ -763,13 +763,15 @@ async def create_chat_completion(request: ChatCompletionRequest):
 
                     if is_shopping_related:
                         summarization_prompt = (
-                            f"请将以下搜索结果总结为500字以内的摘要，重点提取与购物安全、价格合理性、平台可信度相关的信息："
-                            f"\n\n{truncated_content}"
+                            f"请将以下搜索结果总结为700字以内的摘要，重点提取与用户原始问题有关的信息和商品价格、平台可信度等和购物有关的信息。如果你发现搜索结果与用户问题不相关，请根据自己的知识给出一个合理的回答,也限定700字以内。"
+                            f"请参考用户的原始问题：{merged_text}\n\n"
+                            f"搜索结果：\n{truncated_content}"
                         )
                     else:
                         summarization_prompt = (
-                            f"请将以下搜索结果总结为500字以内的摘要，保留关键信息："
-                            f"\n\n{truncated_content}"
+                            f"请将以下搜索结果总结为700字以内的摘要，重点提取与用户原始问题有关的信息和商品价格、平台可信度等和购物有关的信息。如果你发现搜索结果与用户问题不相关，请根据自己的知识给出一个合理的回答,也限定700字以内。"
+                            f"请参考用户的原始问题：{merged_text}\n\n"
+                            f"搜索结果：\n{truncated_content}"
                         )
 
                     # 使用更保守的参数进行摘要
@@ -797,10 +799,39 @@ async def create_chat_completion(request: ChatCompletionRequest):
                         logger.info(f"摘要内容预览: {final_search_content_for_llm[:200]}...")
                     else:
                         logger.warning(
-                            f"搜索结果摘要失败: {summary_error}。使用截断的原始结果。"
+                            f"搜索结果摘要失败: {summary_error}。将尝试使用LLM生成替代内容。"
                         )
-                        # 使用截断的原始结果，而不是完整结果
-                        final_search_content_for_llm = truncated_content
+                        # 降级处理：让LLM根据原始问题生成分析，作为替代的搜索结果
+                        fallback_prompt = (
+                            f"由于外部搜索无法获得满意的结果，请你仅根据已有的知识，"
+                            f"分析并回答以下用户问题。请像一个知识渊博的助手一样，"
+                            f"提供一个全面、详细的回答。\n\n用户问题：{merged_text}"
+                        )
+                        
+                        fallback_messages = [{"role": "user", "content": fallback_prompt}]
+                        
+                        # 使用与摘要相似的参数
+                        fallback_extra_params = {
+                            "temperature": 0.5,
+                            "max_tokens": 2048,
+                            "top_p": 0.9
+                        }
+
+                        fallback_content, fallback_error = ask_vivogpt(
+                            messages=fallback_messages,
+                            model=request.model,
+                            extra=fallback_extra_params,
+                        )
+
+                        if fallback_content and fallback_content.strip():
+                            final_search_content_for_llm = fallback_content.strip()
+                            logger.info("LLM成功生成了替代内容。")
+                        else:
+                            logger.error(
+                                f"LLM生成替代内容也失败了: {fallback_error}。将使用空内容。"
+                            )
+                            # 最终的兜底策略
+                            final_search_content_for_llm = "无法获取相关信息。"
                 else:
                     logger.info("搜索结果长度适中，直接使用原始结果。")
                     final_search_content_for_llm = core_result_str
