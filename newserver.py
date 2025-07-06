@@ -850,7 +850,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
             if is_shopping_related:
                 system_prompt_for_final_answer = get_system_prompt(user_type)
             else:
-                system_prompt_for_final_answer = "你是一个智能助手，旨在回答用户的问题。请根据用户的提问和提供的背景信息生成准确的回复。"
+                system_prompt_for_final_answer = get_normal_system_prompt(user_type)
 
             messages_for_final_llm = [
                 {"role": "system", "content": system_prompt_for_final_answer}
