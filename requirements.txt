@@ -27,3 +27,6 @@ anyio==4.9.0
 # For CORS middleware
 fastapi[standard]
 
+# For system monitoring
+psutil==6.0.0
+

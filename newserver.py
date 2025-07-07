@@ -32,6 +32,18 @@ from prompt import (
 # 加载环境变量
 load_dotenv()
 
+# --- 生产环境配置 ---
+# 请求超时配置
+DEFAULT_REQUEST_TIMEOUT = int(os.getenv("DEFAULT_REQUEST_TIMEOUT", "30"))
+LLM_REQUEST_TIMEOUT = int(os.getenv("LLM_REQUEST_TIMEOUT", "120"))
+RAG_REQUEST_TIMEOUT = int(os.getenv("RAG_REQUEST_TIMEOUT", "20"))
+SEARCH_REQUEST_TIMEOUT = int(os.getenv("SEARCH_REQUEST_TIMEOUT", "10"))
+
+# 日志配置
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+LOG_MAX_BYTES = int(os.getenv("LOG_MAX_BYTES", "10485760"))  # 10MB
+LOG_BACKUP_COUNT = int(os.getenv("LOG_BACKUP_COUNT", "5"))
+
 # 导入新的 schemas
 from schemas import (
     ModelCard,
@@ -44,13 +56,27 @@ from schemas import (
 )
 
 # --- 日志和应用初始化 ---
+import logging.handlers
+
+# 配置日志轮转以防止磁盘空间耗尽
+log_handlers = [logging.StreamHandler()]
+
+# 如果是生产环境，添加文件日志
+if os.getenv("ENVIRONMENT") == "production":
+    file_handler = logging.handlers.RotatingFileHandler(
+        "shopguard.log",
+        maxBytes=LOG_MAX_BYTES,
+        backupCount=LOG_BACKUP_COUNT,
+        encoding='utf-8'
+    )
+    log_handlers.append(file_handler)
+
 logging.basicConfig(
-    level=logging.INFO, 
+    level=getattr(logging, LOG_LEVEL.upper(), logging.INFO),
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.StreamHandler()
-    ]
+    handlers=log_handlers
 )
+
 # 设置日志编码
 for handler in logging.getLogger().handlers:
     if hasattr(handler, 'setEncoding'):
@@ -63,12 +89,18 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# 配置CORS，允许跨域请求
+# 记录启动时间用于健康检查
+startup_time = time.time()
+
+# 配置CORS，根据环境调整安全性
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",") if os.getenv("ALLOWED_ORIGINS") else ["*"]
+CORS_ALLOW_CREDENTIALS = os.getenv("CORS_ALLOW_CREDENTIALS", "true").lower() == "true"
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 允许所有来源（开发环境）
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=CORS_ALLOW_CREDENTIALS,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -283,6 +315,51 @@ def generate_openai_stream(response, request_id, model, user_id, conversation_hi
 
 # --- 会话历史管理---
 conversation_history: Dict[str, list] = {}
+conversation_timestamps: Dict[str, float] = {}
+
+# 会话历史配置
+CONVERSATION_TTL_SECONDS = int(os.getenv("CONVERSATION_TTL_SECONDS", "7200"))  # 2小时默认
+MAX_CONVERSATIONS = int(os.getenv("MAX_CONVERSATIONS", "1000"))  # 最大会话数
+CLEANUP_INTERVAL = 300  # 5分钟清理一次
+last_cleanup_time = time.time()
+
+def cleanup_conversation_history():
+    """清理过期的会话历史和限制内存使用"""
+    global last_cleanup_time
+    current_time = time.time()
+    
+    # 只在间隔时间后执行清理
+    if current_time - last_cleanup_time < CLEANUP_INTERVAL:
+        return
+    
+    try:
+        # 清理过期会话
+        expired_users = []
+        for user_id, timestamp in conversation_timestamps.items():
+            if current_time - timestamp > CONVERSATION_TTL_SECONDS:
+                expired_users.append(user_id)
+        
+        for user_id in expired_users:
+            conversation_history.pop(user_id, None)
+            conversation_timestamps.pop(user_id, None)
+        
+        # 如果会话数量仍然过多，清理最老的会话
+        if len(conversation_history) > MAX_CONVERSATIONS:
+            # 按时间戳排序，删除最老的会话
+            sorted_users = sorted(conversation_timestamps.items(), key=lambda x: x[1])
+            users_to_remove = sorted_users[:len(conversation_history) - MAX_CONVERSATIONS]
+            
+            for user_id, _ in users_to_remove:
+                conversation_history.pop(user_id, None)
+                conversation_timestamps.pop(user_id, None)
+        
+        if expired_users or len(conversation_history) > MAX_CONVERSATIONS:
+            logger.info(f"清理会话历史: 删除了 {len(expired_users)} 个过期会话，当前活跃会话数: {len(conversation_history)}")
+        
+        last_cleanup_time = current_time
+        
+    except Exception as e:
+        logger.error(f"会话历史清理失败: {e}", exc_info=True)
 
 # --- RAG 系统初始化 ---
 RAG_APP_ID = os.getenv("VIVO_APP_ID")
@@ -290,18 +367,20 @@ RAG_APP_KEY = os.getenv("VIVO_APP_KEY")
 RAG_API_DOMAIN = os.getenv("RAG_API_DOMAIN")
 RAG_API_URI = os.getenv("RAG_API_URI")
 
+# 使用优雅降级而不是硬失败
 if not all([RAG_APP_ID, RAG_APP_KEY, RAG_API_DOMAIN, RAG_API_URI]):
-    raise ValueError(
-        "请在.env文件中配置RAG_APP_ID,RAG_APP_KEY, RAG_API_DOMAIN 和 RAG_API_URI。"
+    logger.warning(
+        "RAG环境变量未完全配置 (VIVO_APP_ID, VIVO_APP_KEY, RAG_API_DOMAIN, RAG_API_URI)。"
+        "RAG功能将不可用，但服务器将继续运行。"
     )
+    RAG_APP_ID = RAG_APP_KEY = RAG_API_DOMAIN = RAG_API_URI = None
 
 embedding_client_rag = None
 knowledge_base_rag = None
 rag_system_instance = None
 
-if (
-    True
-):  # 某些调用RAG的逻辑RAG_APP_ID != 'YOUR_VIVO_APP_ID' and RAG_APP_KEY != 'YOUR_VIVO_APP_KEY':
+# 只在配置完整时初始化RAG系统
+if all([RAG_APP_ID, RAG_APP_KEY, RAG_API_DOMAIN, RAG_API_URI]):
     try:
         embedding_client_rag = VivoEmbeddingClient(
             app_id=RAG_APP_ID,
@@ -325,7 +404,7 @@ if (
         logger.error(f"RAG 系统初始化失败: {e}", exc_info=True)
         rag_system_instance = None
 else:
-    logger.warning("RAG_APP_ID 或 RAG_APP_KEY 未配置。RAG 系统将不可用。")
+    logger.warning("RAG配置不完整，RAG 系统将不可用。")
 
 
 # --- 标准化错误处理 ---
@@ -562,8 +641,13 @@ async def create_chat_completion(request: ChatCompletionRequest):
             is_shopping_related = True  # 默认为购物相关，避免误判
 
         # 会话历史管理
+        cleanup_conversation_history()  # 定期清理过期会话
+        
         if user_id not in conversation_history:
             conversation_history[user_id] = []
+            
+        # 更新用户会话时间戳
+        conversation_timestamps[user_id] = time.time()
 
         # 确保会话历史不超过最大长度
         max_history = 100
@@ -995,22 +1079,81 @@ async def root():
 
 @app.get("/v1/health")
 async def health_check():
-    """健康检查端点"""
-    return {
-        "status": "healthy",
-        "timestamp": int(time.time()),
-        "rag_available": rag_system_instance is not None,
-        "query_rewriting_available": query_rewriter is not None,
-        "active_sessions": len(conversation_history),
-        "system_info": {
-            "rag_initialized": rag_system_instance is not None,
+    """增强的健康检查端点，包含稳定性监控"""
+    import psutil
+    import gc
+    
+    try:
+        # 基本健康状态
+        health_status = {
+            "status": "healthy",
+            "timestamp": int(time.time()),
+            "uptime_seconds": int(time.time() - startup_time),
+        }
+        
+        # 系统资源监控
+        try:
+            process = psutil.Process()
+            memory_info = process.memory_info()
+            health_status["system_info"] = {
+                "memory_usage_mb": round(memory_info.rss / 1024 / 1024, 2),
+                "memory_percent": round(process.memory_percent(), 2),
+                "cpu_percent": round(process.cpu_percent(), 2),
+                "threads": process.num_threads(),
+            }
+        except:
+            # 如果psutil不可用，提供基本信息
+            health_status["system_info"] = {"status": "monitoring_unavailable"}
+        
+        # 服务状态
+        health_status["services"] = {
+            "rag_available": rag_system_instance is not None,
+            "query_rewriting_available": query_rewriter is not None,
             "knowledge_base_size": (
                 len(ALL_KNOWLEDGE_EMBEDDING_DATA) if ALL_KNOWLEDGE_EMBEDDING_DATA else 0
             ),
             "query_rewriter_enabled": query_rewriter.should_rewrite() if query_rewriter else False,
             "query_rewrite_mode": getattr(query_rewriter, 'rewrite_mode', 'auto') if query_rewriter else 'unknown',
-        },
-    }
+        }
+        
+        # 会话管理状态
+        health_status["session_management"] = {
+            "active_sessions": len(conversation_history),
+            "max_sessions_limit": MAX_CONVERSATIONS,
+            "session_ttl_seconds": CONVERSATION_TTL_SECONDS,
+            "last_cleanup_time": int(last_cleanup_time),
+            "cleanup_interval_seconds": CLEANUP_INTERVAL,
+        }
+        
+        # 配置状态
+        health_status["configuration"] = {
+            "environment": os.getenv("ENVIRONMENT", "development"),
+            "log_level": LOG_LEVEL,
+            "timeouts": {
+                "default_request": DEFAULT_REQUEST_TIMEOUT,
+                "llm_request": LLM_REQUEST_TIMEOUT,
+                "rag_request": RAG_REQUEST_TIMEOUT,
+                "search_request": SEARCH_REQUEST_TIMEOUT,
+            }
+        }
+        
+        # 垃圾回收统计
+        gc_stats = gc.get_stats()
+        health_status["gc_stats"] = {
+            "collections": [stat["collections"] for stat in gc_stats],
+            "collected": [stat["collected"] for stat in gc_stats],
+            "uncollectable": [stat["uncollectable"] for stat in gc_stats],
+        }
+        
+        return health_status
+        
+    except Exception as e:
+        logger.error(f"健康检查失败: {e}", exc_info=True)
+        return {
+            "status": "degraded", 
+            "error": str(e),
+            "timestamp": int(time.time())
+        }
 
 
 @app.get("/v1/stats")
