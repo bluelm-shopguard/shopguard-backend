@@ -54,6 +54,10 @@ logs/
 *.sqlite
 *.db
 
+# === 生产环境日志 ===
+shopguard.log*
+*.log.*
+
 # === 操作系统 ===
 .DS_Store
 .DS_Store?
